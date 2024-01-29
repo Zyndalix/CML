@@ -1,0 +1,16 @@
+User Interface:
+	- Text box where the user can input code
+	- Text box where the user inputs the amount of runs
+	- Buttons like 'Run'
+
+	Eventually:
+	- Syntax highlighting
+
+Graph:
+	- find suitable graphing lib
+
+Interpreter:
+	- function to output a binary tree
+	- function to print a binary tree to output
+	- check() function that checks input
+	- getList() function that returns a linked list of all coordinates
