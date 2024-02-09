@@ -1,0 +1,4 @@
+'This file is meant to be used during the development stage.
+
+x = 5 - 2 * 4 - x 'this is a comment
+z = 8 / 2 + 25 * 1 + 5 + z + x ' this is yet another comment
