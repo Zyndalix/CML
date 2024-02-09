@@ -10,7 +10,8 @@ Graph:
 	- find suitable graphing lib
 
 Interpreter:
-	- function to output a binary tree
-	- function to print a binary tree to output
-	- check() function that checks input
-	- getList() function that returns a linked list of all coordinates
+	- add support for parentheses
+	- add support for multiple parentheses (parallel and nested)
+	- add support for sin, cos, tan, sqrt and log
+	- add support for if statements
+	- various functions that check input
