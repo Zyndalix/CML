@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rm ./*.class interpreter/*.class
+javac Main.java
+java Main
