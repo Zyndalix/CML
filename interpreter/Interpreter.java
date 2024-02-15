@@ -5,6 +5,11 @@ import java.lang.NumberFormatException;
 
 public class Interpreter {
 
+	// this becomes true if an error is encountered; functions of the interpreter will then not execute
+	static boolean error = false;
+	
+	static int numberOfTimesSplit = 0;
+
 	static void debugPrint() {
 		for (Variable v : Variable.list) {
 			v.print();
@@ -15,6 +20,8 @@ public class Interpreter {
 		for (Node n : Node.list) {
 			n.print();
 		}
+		
+		System.out.println(numberOfTimesSplit);
 	}
 	
 	
@@ -30,8 +37,8 @@ public class Interpreter {
 		}
 
 		// parse variables and rules
-		Parse.parse(variables, Parse.VARIABLES);
-		Parse.parse(rules, Parse.RULES);
+		Parser.parse(variables, Parser.VARIABLES);
+		Parser.parse(rules, Parser.RULES);
 		
 		// remove this before final release
 		debugPrint();
@@ -41,8 +48,11 @@ public class Interpreter {
 			System.out.println("Iteration " + i);
 		}*/
 		
-		for (Node n : Node.list) {
-			Execute.executeRule(n);
-		}
+		/*for (Node n : Node.list) {
+			Executer.executeRule(n);
+		}*/
+		
+		//double a = Math.sin(3.1415 * 0.5);
+		//System.out.println(a);
 	}
 }
