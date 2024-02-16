@@ -5,8 +5,18 @@ class Parser {
 	// modes for the parse() function
 	static final int RULES = 0;
 	static final int VARIABLES = 1;
+	
+	static String prepare(String input) {
+		// append a newline to the input string if there isn't one already,
+		// this simplifies extracting stuff from it later on
+		if (input.charAt(input.length() - 1) != '\n') {
+			input = input.concat("\n");
+		}
+		
+		return input;
+	}
 
-	static void parse(String input, int mode) {
+	static void extract(String input, int mode) {
 	
 		StringBuilder sb = new StringBuilder();
 		String before = new String(); // before the = sign

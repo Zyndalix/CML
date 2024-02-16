@@ -3,6 +3,7 @@ import interpreter.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 
 class Main {
@@ -28,7 +29,8 @@ class Main {
 
 		String variables = getContentsOfFile("variables");
 		String rules = getContentsOfFile("rules");
+		int iterations = 10;
 
-		Interpreter.start(variables, rules, 1);
+		ArrayList<ArrayList<String>> chartData = Interpreter.main(variables, rules, iterations);
 	}
 }

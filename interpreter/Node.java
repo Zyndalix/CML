@@ -35,7 +35,7 @@ class Node {
 
     
     boolean isOperator() {
-    	for (String operator : new String[]{"+", "-", "*", "/", "sqrt", "pow", "sin", "cos", "tan"}) {
+    	for (String operator : new String[]{"+", "-", "*", "/", "sqrt", "root", "pow", "sin", "cos", "tan"}) {
     		if (this.data.equals(operator)) {
     			return true;
     		}
@@ -62,7 +62,7 @@ class Node {
 		while (! this.isSplit() && ! Interpreter.error) {
 			this.splitAtSymbol(new String[]{"+", "-"}, OPERATOR);
 			this.splitAtSymbol(new String[]{"*", "/"}, OPERATOR);
-			this.splitAtSymbol(new String[]{"sqrt", "pow", "sin", "cos", "tan"}, FUNCTION);
+			this.splitAtSymbol(new String[]{"sqrt", "root", "pow", "sin", "cos", "tan"}, FUNCTION);
 			
 		}
 	}
@@ -169,6 +169,7 @@ class Node {
 			// note: the requirements of a string being a function are: must contain a '(', must not start with '(' and must
 			// end with ')'			
 			int indexOfParenthesis = -1;
+			
 			for (int i = 0; i < this.data.length(); i++) {
 				if (this.data.charAt(i) == '(') {
 					indexOfParenthesis = i;
@@ -177,10 +178,13 @@ class Node {
 			}
 			
 			if (indexOfParenthesis != -1 && this.data.charAt(0) != '(' && this.data.charAt(this.data.length() - 1) == ')') {
-				// check if function name is valid
 				String functionName = this.data.substring(0, indexOfParenthesis);
+				String arg1 = new String();
+				String arg2 = new String();
 				boolean isValidFunctionName = false;
-				for (String f : new String[]{"sqrt", "pow", "sin", "cos", "tan"}) {
+				
+				// check if function name is valid
+				for (String f : new String[]{"sqrt", "root", "pow", "sin", "cos", "tan"}) {
 					if (functionName.equals(f)) {
 						isValidFunctionName = true;
 						break;
@@ -194,8 +198,6 @@ class Node {
 					// note: functions can have at most 2 arguments in CML
 					int commasEncountered = 0;
 					StringBuilder sb = new StringBuilder();
-					String arg1 = new String();
-					String arg2 = new String();
 					
 					for (int i = indexOfParenthesis + 1; i < this.data.length(); i++) {
 						if (this.data.charAt(i) == ',') {
@@ -216,42 +218,53 @@ class Node {
 								arg2 = sb.toString();
 							}
 							
-							// check that the function got the right amount of arguments
-							if (functionName.equals("sin") || functionName.equals("cos") || functionName.equals("tan")) {
-								// functions that take only one argument
-								if (commasEncountered != 0) {
-									Error.tooManyArguments(functionName);
-								}
-							} else if (functionName.equals("pow")) {
-								// functions that take only two arguments
-								if (commasEncountered != 1) {
-									Error.notEnoughArguments(functionName);
-								}
-							}
-							
-							// finish arranging the function into the current node
-							if (! Interpreter.error) {
-								arg1 = removeOuterParentheses(arg1);
-								arg2 = removeOuterParentheses(arg2);
-								this.left = new Node(arg1);
-								this.right = new Node(arg2);
-								this.data = functionName;
-							}
-							
 						} else {
 							sb.append(this.data.charAt(i));
 						}					
+					}
+				}
+				
+				if (! Interpreter.error) {
+					// check that the function got the right amount of arguments
+					if (arg1.length() == 0) {
+						Error.notEnoughArguments(functionName);
+					} else {							
+						if (functionName.equals("sqrt") || functionName.equals("sin") || functionName.equals("cos") || functionName.equals("tan")) {
+							// functions that take only one argument
+							if (arg2.length() != 0) {
+								Error.tooManyArguments(functionName);
+							}
+						} else if (functionName.equals("root") || functionName.equals("pow")) {
+							// functions that take only two arguments
+							if (arg2.length() == 0) {
+								Error.notEnoughArguments(functionName);
+							}
+						}
+					}
+					
+					// finish arranging the function into the current node
+					if (! Interpreter.error) {
+						arg1 = removeOuterParentheses(arg1);
+						this.left = new Node(arg1);
+						
+						// not all functions have a second argument
+						if (arg2.length() != 0) {
+							arg2 = removeOuterParentheses(arg2);
+							this.right = new Node(arg2);
+						}
+						
+						this.data = functionName;
 					}
 				}
 			}
 		}
 		
 		// also split the subtrees, if they exist
-		if (this.left != null) {
+		if (this.left != null && ! Interpreter.error) {
 			this.left.splitAtSymbol(symbols, mode);
 		}
 
-		if (this.right != null) {
+		if (this.right != null && ! Interpreter.error) {
 			this.right.splitAtSymbol(symbols, mode);
 		}
 	}

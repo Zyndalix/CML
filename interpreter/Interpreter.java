@@ -1,13 +1,12 @@
 package interpreter;
 
-import java.util.LinkedList;
-import java.lang.NumberFormatException;
+import java.util.ArrayList;
 
 public class Interpreter {
 
 	// this becomes true if an error is encountered; functions of the interpreter will then not execute
 	static boolean error = false;
-	
+	static ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 	static int numberOfTimesSplit = 0;
 
 	static void debugPrint() {
@@ -21,38 +20,43 @@ public class Interpreter {
 			n.print();
 		}
 		
-		System.out.println(numberOfTimesSplit);
+		// uncomment this for an interesting statistic
+		//System.out.println("Number of times the splitAtSymbol() function has been called: " + numberOfTimesSplit);
+		
+		System.out.println(data);
 	}
 	
 	
-	public static void start(String variables, String rules, int iterations) {
-		// append a newline to both strings if there isn't one already,
-		// this makes life easier for us and the code more readable
-		if (variables.charAt(variables.length() - 1) != '\n') {
-			variables = variables.concat("\n");
-		}
-		
-		if (rules.charAt(rules.length() - 1) != '\n') {
-			rules = rules.concat("\n");
-		}
+	public static ArrayList<ArrayList<String>> main(String variables, String rules, int iterations) {
+		// pre-interpreting tasks are performed here
+		variables = Parser.prepare(variables);
+		rules = Parser.prepare(rules);
 
 		// parse variables and rules
-		Parser.parse(variables, Parser.VARIABLES);
-		Parser.parse(rules, Parser.RULES);
+		Parser.extract(variables, Parser.VARIABLES);
+		Parser.extract(rules, Parser.RULES);
 		
-		// remove this before final release
-		debugPrint();
+		// prepare the data array
+		for (int i = 0; i < Variable.list.size(); i++) {
+			data.add(new ArrayList<String>());
+			data.get(i).add(Variable.list.get(i).name);
+		}
 
-		// calculate variables according to rules
-		/*for (int i = 1; i <= iterations; i++) {
-			System.out.println("Iteration " + i);
-		}*/
+		// calculate variables according to rules		
+		for (int iter = 0; iter < iterations && ! error; iter++) {
+			for (int i = 0; i < Node.list.size() && ! error; i++) {
+				Executer.executeRule(Node.list.get(i));
+			}
+			
+			// create a snapshot of all variables
+			for (int i = 0; i < Variable.list.size() && ! error; i++) {
+				data.get(i).add(Double.toString(Variable.list.get(i).value));
+			}
+		}
 		
-		/*for (Node n : Node.list) {
-			Executer.executeRule(n);
-		}*/
+		// remove this before final release; comment this to make the interpreter quiet
+		debugPrint();
 		
-		//double a = Math.sin(3.1415 * 0.5);
-		//System.out.println(a);
+		return data;
 	}
 }
