@@ -23,7 +23,5 @@ Graph:
 	- find suitable graphing lib
 
 Interpreter:
-	- function to output a binary tree
-	- function to print a binary tree to output
 	- check() function that checks input
-	- getList() function that returns a linked list of all coordinates
+	- support for log
