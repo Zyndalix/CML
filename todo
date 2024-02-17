@@ -23,5 +23,11 @@ Graph:
 	- find suitable graphing lib
 
 Interpreter:
-	- check() function that checks input
-	- support for log
+	- prepare():
+		- move comment handling to this function
+		- check if number of ( equals number of )
+		- add newline if needed
+	- parser and executer:
+		- support for log()
+		- support for e (euler's number)
+		- support for pi
