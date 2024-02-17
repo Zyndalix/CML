@@ -1,0 +1,9 @@
+'This file is meant to be used during the development stage.
+
+'x = (5 - 2) * ((4 - x) * 1/2) 'this is a comment
+'y = 8 / 2 + 25 * 1 + 5 + z + x ' this is yet another comment
+'z = ((2 - 1) * (4 - 2) * (5 - 2)) / (2 + 2)
+'z = 2 + (sqrt(((2+2)+4) * 3, 2) * 3)
+z = pow(2, ((6+2) * 2) / 4)
+y = root(3, 8)
+x = sin(cos(1))

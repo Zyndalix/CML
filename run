@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [[ $1 == "-c" ]]; then
+	rm ./*.class interpreter/*.class
+	javac Main.java
+fi
+
+java Main
