@@ -10,11 +10,17 @@ import java.util.ArrayList;
 //UI
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+
+import org.jfree.chart.JFreeChart;
 import ui.*;
 
 
 class Main {
 
+	public static JFrameWindow appWindow;
+	public static JFreeChart currentChart;
+
+	public static Runnable UIThread;
 	static String getContentsOfFile(String file) {
 		String data = new String();
 		try {
@@ -39,7 +45,8 @@ class Main {
 		ArrayList<ArrayList<String>> chartData = interpretData();
 
 		//Creating graph on start, needs to change to graph button eventually
-		CreateGraph.setData(chartData, 0, 1);
+		currentChart = CreateGraph.setData(chartData, 0, 1);
+
 	}
 
 
@@ -54,7 +61,6 @@ class Main {
 	}
 
 	private static void setUpUI(){
-		//Still need to set up UI in this method
 
 		// following two lines are not important
 		String s = UIManager.getSystemLookAndFeelClassName();
@@ -63,7 +69,12 @@ class Main {
 		// boilerplate code needed for setting up the window, don't delete
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				JFrameWindow window = new JFrameWindow();
+				appWindow = new JFrameWindow();
+				updateGraph();
+			}
+
+			public void updateGraph(){
+				appWindow.updateGraph(currentChart);
 			}
 		});
 	}

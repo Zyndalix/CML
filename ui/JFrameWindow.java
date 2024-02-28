@@ -1,5 +1,8 @@
 package ui;
 
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Color;
@@ -13,7 +16,6 @@ import javax.swing.JScrollPane;
 
 public class JFrameWindow {
 	private JFrame frame;
-
 	public JFrameWindow() {
 		initialize();
 	}
@@ -43,5 +45,18 @@ public class JFrameWindow {
 
 		frame.pack();
 		frame.setVisible(true);
+	}
+
+	public void updateGraph(JFreeChart chart){
+		JPanel chartPanel = new JPanel();
+		chartPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
+		chartPanel.setPreferredSize(new Dimension(320, 240));
+
+		ChartPanel addPanel = new ChartPanel(chart);
+		addPanel.setPreferredSize(new Dimension(320, 240));
+
+		chartPanel.add(addPanel);
+		frame.add(chartPanel);
+		frame.pack();
 	}
 }
