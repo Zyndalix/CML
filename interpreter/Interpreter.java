@@ -6,7 +6,7 @@ public class Interpreter {
 
 	// this becomes true if an error is encountered; functions of the interpreter will then not execute
 	static boolean error = false;
-	static ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+	static ArrayList<ArrayList<String>> data = new ArrayList<>();
 	static int numberOfTimesSplit = 0;
 
 	static void debugPrint() {
@@ -27,7 +27,7 @@ public class Interpreter {
 	}
 	
 	
-	public static ArrayList<ArrayList<String>> main(String variables, String rules, int iterations) {
+	public static ArrayList<ArrayList<String>> interpret(String variables, String rules, int iterations) {
 		// pre-interpreting tasks are performed here
 		variables = Parser.prepare(variables);
 		rules = Parser.prepare(rules);
@@ -38,7 +38,7 @@ public class Interpreter {
 		
 		// prepare the data array
 		for (int i = 0; i < Variable.list.size(); i++) {
-			data.add(new ArrayList<String>());
+			data.add(new ArrayList<>());
 			data.get(i).add(Variable.list.get(i).name);
 		}
 

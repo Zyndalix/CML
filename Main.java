@@ -1,4 +1,6 @@
 import interpreter.*;
+import graphing.*;
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,16 +38,19 @@ class Main {
 		//Interpreting data in main right now, needs to change to button in UI
 		ArrayList<ArrayList<String>> chartData = interpretData();
 
+		//Creating graph on start, needs to change to graph button eventually
+		CreateGraph.setData(chartData, 0, 1);
 	}
+
 
 	private static ArrayList<ArrayList<String>> interpretData(){
 		String variables = getContentsOfFile("variables");
 		String rules = getContentsOfFile("rules");
 
 		//Check UI for iterations, 10 is default for now
-		int iterations = 10;
+		int iterations = 100;
 
-		return Interpreter.main(variables, rules, iterations);
+		return Interpreter.interpret(variables, rules, iterations);
 	}
 
 	private static void setUpUI(){
