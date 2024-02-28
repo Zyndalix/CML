@@ -3,10 +3,7 @@ package ui;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
@@ -27,7 +24,7 @@ public class JFrameWindow {
 		frame.setResizable(false);
 
 		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+		panel.setLayout(new GridLayout(2, 2, 5, 5));
 		panel.setPreferredSize(new Dimension(400, 250));
 		//panel.setBackground(Color.GREEN);
 		//Find nice color for right panel
@@ -45,10 +42,11 @@ public class JFrameWindow {
 		panel.add(button1);*/
 
 		JLabel rulesLabel = new JLabel("Rules:");
-		panel.add(rulesLabel, BorderLayout.NORTH);
+		panel.add(rulesLabel);
 
 		JLabel variablesLabel = new JLabel("Start variables:");
-		panel.add(variablesLabel, BorderLayout.EAST);
+		panel.add(variablesLabel, BorderLayout.PAGE_END);
+
 
 		JTextArea rulesTextArea = new JTextArea(10,10);
 		JScrollPane rulesScroll = new JScrollPane(rulesTextArea);
