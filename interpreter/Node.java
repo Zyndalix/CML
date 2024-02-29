@@ -1,6 +1,8 @@
 package interpreter;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
 
 // this is for the abstract syntax tree; each rule has its own binary tree
 class Node {
@@ -11,6 +13,15 @@ class Node {
 	static final int OPERATOR = 0;
 	static final int FUNCTION = 1;
 	
+	// these are declared here to avoid redundant code
+	static final char[] ALL_OPERATORS_LIST = {'+', '-', '*', '/'};
+	static final String[] ALL_FUNCTIONS_LIST = {"sqrt", "root", "pow", "log", "sin", "cos", "tan"};
+	static final String[] ALL_SYMBOLS_LIST = {"+", "-", "*", "/", "sqrt", "root", "pow", "log", "sin", "cos", "tan"};
+	
+	static final List<String> REQUIRES_ONE_ARG = Arrays.asList(new String[]{"sqrt", "sin", "cos", "tan"});
+	static final List<String> REQUIRES_TWO_ARGS = Arrays.asList(new String[]{"root", "pow"});
+	// all functions that do not occur in these arrays can accept either one or two arguments
+
 	String data;
 	Node left = null;
 	Node right = null;
@@ -35,7 +46,7 @@ class Node {
 
     
     boolean isOperator() {
-    	for (String operator : new String[]{"+", "-", "*", "/", "sqrt", "root", "pow", "sin", "cos", "tan"}) {
+    	for (String operator : ALL_SYMBOLS_LIST) {
     		if (this.data.equals(operator)) {
     			return true;
     		}
@@ -62,7 +73,7 @@ class Node {
 		while (! this.isSplit() && ! Interpreter.error) {
 			this.splitAtSymbol(new String[]{"+", "-"}, OPERATOR);
 			this.splitAtSymbol(new String[]{"*", "/"}, OPERATOR);
-			this.splitAtSymbol(new String[]{"sqrt", "root", "pow", "sin", "cos", "tan"}, FUNCTION);
+			this.splitAtSymbol(ALL_FUNCTIONS_LIST, FUNCTION);
 			
 		}
 	}
@@ -82,7 +93,7 @@ class Node {
 			} else if (this.data.charAt(i) == ')') {
 				closePar++;
 			} else {
-				for (char c : new char[]{'+', '-', '*', '/'}) {
+				for (char c : ALL_OPERATORS_LIST) {
 					if (openPar == closePar && this.data.length() > 1 && this.data.charAt(i) == c) {
 						return false;
 					}
@@ -184,7 +195,7 @@ class Node {
 				boolean isValidFunctionName = false;
 				
 				// check if function name is valid
-				for (String f : new String[]{"sqrt", "root", "pow", "sin", "cos", "tan"}) {
+				for (String f : ALL_FUNCTIONS_LIST) {
 					if (functionName.equals(f)) {
 						isValidFunctionName = true;
 						break;
@@ -228,13 +239,13 @@ class Node {
 					// check that the function got the right amount of arguments
 					if (arg1.length() == 0) {
 						Error.notEnoughArguments(functionName);
-					} else {							
-						if (functionName.equals("sqrt") || functionName.equals("sin") || functionName.equals("cos") || functionName.equals("tan")) {
+					} else {		
+						if (REQUIRES_ONE_ARG.contains(functionName)) {					
 							// functions that take only one argument
 							if (arg2.length() != 0) {
 								Error.tooManyArguments(functionName);
 							}
-						} else if (functionName.equals("root") || functionName.equals("pow")) {
+						} else if (REQUIRES_TWO_ARGS.contains(functionName)) {
 							// functions that take only two arguments
 							if (arg2.length() == 0) {
 								Error.notEnoughArguments(functionName);
