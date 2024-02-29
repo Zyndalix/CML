@@ -1,16 +1,16 @@
 package interpreter;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 // this is for the abstract syntax tree; each rule has its own binary tree
 class Node {
 
-	static LinkedList<Node> list = new LinkedList<Node>();
+	static ArrayList<Node> list = new ArrayList<Node>();
 	
 	// modes for the splitAtSymbol() function
 	static final int OPERATOR = 0;
 	static final int FUNCTION = 1;
-
+	
 	String data;
 	Node left = null;
 	Node right = null;

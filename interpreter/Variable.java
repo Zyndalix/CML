@@ -1,10 +1,10 @@
 package interpreter;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 class Variable {
 
-	static LinkedList<Variable> list = new LinkedList<Variable>();
+	static ArrayList<Variable> list = new ArrayList<Variable>();
 	
 	// returns the variable that has the given name
 	static Variable get(String searchName) {
