@@ -40,22 +40,23 @@ class Main {
 
 	public static void main(String[] args) {
 		setUpUI();
+		generateChart();
+	}
 
+	public static void generateChart(){
+		//Check UI for iterations, 10 is default for now
+		int iterations = 200;
+		double step = 0.1;
 		//Interpreting data in main right now, needs to change to button in UI
-		ArrayList<ArrayList<String>> chartData = interpretData();
-
+		ArrayList<ArrayList<String>> chartData = interpretData(iterations);
 		//Creating graph on start, needs to change to graph button eventually
-		currentChart = CreateGraph.setData(chartData, 0, 1);
-
+		currentChart = CreateGraph.setData(chartData,iterations,step);
 	}
 
 
-	private static ArrayList<ArrayList<String>> interpretData(){
+	private static ArrayList<ArrayList<String>> interpretData(int iterations){
 		String variables = getContentsOfFile("variables");
 		String rules = getContentsOfFile("rules");
-
-		//Check UI for iterations, 10 is default for now
-		int iterations = 100;
 
 		return Interpreter.interpret(variables, rules, iterations);
 	}

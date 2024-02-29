@@ -24,12 +24,11 @@ public class JFrameWindow {
 		frame.setResizable(false);
 
 		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(2, 2, 5, 5));
-		panel.setPreferredSize(new Dimension(400, 250));
+		panel.setLayout(new FlowLayout());
+		panel.setPreferredSize(new Dimension(400, 125));
 		//panel.setBackground(Color.GREEN);
 		//Find nice color for right panel
 
-		frame.add(panel, BorderLayout.EAST);
 
 		/*JButton button1 = new JButton("Button 1");
 
@@ -41,20 +40,25 @@ public class JFrameWindow {
 		});
 		panel.add(button1);*/
 
+
+        JPanel labelPanel = new JPanel();
+        labelPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 10));
+
 		JLabel rulesLabel = new JLabel("Rules:");
-		panel.add(rulesLabel);
-
+		labelPanel.add(rulesLabel, BorderLayout.NORTH);
 		JLabel variablesLabel = new JLabel("Start variables:");
-		panel.add(variablesLabel, BorderLayout.PAGE_END);
+		labelPanel.add(variablesLabel, BorderLayout.NORTH);
+        frame.add(labelPanel, BorderLayout.EAST);
 
+        JTextArea variablesTextArea = new JTextArea(1, 1);
+        JScrollPane variablesScroll = new JScrollPane(variablesTextArea);
+        panel.add(variablesScroll, BorderLayout.EAST);
 
-		JTextArea rulesTextArea = new JTextArea(10,10);
+		JTextArea rulesTextArea = new JTextArea(1,1);
 		JScrollPane rulesScroll = new JScrollPane(rulesTextArea);
-		panel.add(rulesScroll, BorderLayout.WEST);
+		panel.add(rulesScroll, BorderLayout.EAST);
 
-		JTextArea variablesTextArea = new JTextArea(10, 10);
-		JScrollPane variablesScroll = new JScrollPane(variablesTextArea);
-		panel.add(variablesScroll, BorderLayout.EAST);
+        frame.add(panel, BorderLayout.EAST);
 
 		frame.pack();
 		frame.setVisible(true);
