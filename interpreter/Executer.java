@@ -21,7 +21,7 @@ class Executer {
 		double result = 0, left = 0, right = 0;
 		
 		// make sure that the equation is not just a mere number or variable
-		if (! equation.isOperator()) {
+		if (! equation.isSymbol()) {
 		
 			if (equation.isNumber()) {
 				result = Double.parseDouble(equation.data);
@@ -39,7 +39,7 @@ class Executer {
 		
 			// get value for the left operand
 			if (equation.left != null) {
-				if (equation.left.isOperator()) {
+				if (equation.left.isSymbol()) {
 					left = calculate(equation.left);
 				} else if (equation.left.isNumber()) {
 					left = Double.parseDouble(equation.left.data);
@@ -56,7 +56,7 @@ class Executer {
 			
 			// get value for the right operand
 			if (equation.right != null) {
-				if (equation.right.isOperator()) {
+				if (equation.right.isSymbol()) {
 					right = calculate(equation.right);
 				} else if (equation.right.isNumber()) {
 					right = Double.parseDouble(equation.right.data);

@@ -45,7 +45,7 @@ class Node {
     }
 
     
-    boolean isOperator() {
+    boolean isSymbol() {
     	for (String operator : ALL_SYMBOLS_LIST) {
     		if (this.data.equals(operator)) {
     			return true;
