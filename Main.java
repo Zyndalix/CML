@@ -19,6 +19,8 @@ class Main {
 
 	public static JFrameWindow appWindow;
 	public static JFreeChart currentChart;
+	public static ArrayList<String> lineNames;
+
 
 	public static Runnable UIThread;
 	static String getContentsOfFile(String file) {
@@ -48,7 +50,8 @@ class Main {
 		int iterations = 1000;
 		//Interpreting data in main right now, needs to change to button in UI
 		ArrayList<ArrayList<String>> chartData = interpretData(iterations);
-
+		for (int i = 0; i< chartData.size(); i++)
+			lineNames.add(chartData.get(i).get(0));
 		//Change variable on x-axis through UI, default = 0 for now
 		int xAxisIndex = 0;
 
@@ -66,6 +69,7 @@ class Main {
 
 	private static void setUpUI(){
 
+		lineNames = new ArrayList<String>();
 		// following two lines are not important
 		String s = UIManager.getSystemLookAndFeelClassName();
 		System.out.println(s);
@@ -77,8 +81,10 @@ class Main {
 				updateGraph();
 			}
 
-			public void updateGraph(){
-				appWindow.updateGraph(currentChart);
+			public void updateGraph()
+			{
+				appWindow.updateGraph(currentChart, lineNames, 0);
+
 			}
 		});
 	}
