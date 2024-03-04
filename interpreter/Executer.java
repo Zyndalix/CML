@@ -85,6 +85,12 @@ class Executer {
 				result = Math.pow(right, 1 / left);
 			} else if (equation.data.equals("pow")) {
 				result = Math.pow(left, right);
+			} else if (equation.data.equals("log")) {
+				result = Math.log(right) / Math.log(10);
+			} else if (equation.data.equals("logbase")) {
+				result = Math.log(right) / Math.log(left);
+			} else if (equation.data.equals("ln")) {
+				result = Math.log(left);
 			} else if (equation.data.equals("sin")) {
 				result = Math.sin(left);
 			} else if (equation.data.equals("cos")) {

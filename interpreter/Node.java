@@ -14,13 +14,13 @@ class Node {
 	static final int FUNCTION = 1;
 	
 	// these are declared here to avoid redundant code
-	static final char[] ALL_OPERATORS_LIST = {'+', '-', '*', '/'};
-	static final String[] ALL_FUNCTIONS_LIST = {"sqrt", "root", "pow", "log", "sin", "cos", "tan"};
-	static final String[] ALL_SYMBOLS_LIST = {"+", "-", "*", "/", "sqrt", "root", "pow", "log", "sin", "cos", "tan"};
+	// CAUTION: all functions must either accept one or two arguments, meaning that the same function must
+	// always accept the same number of arguments, no matter what the context is
+	static final String[] OPERATORS_LIST = {"+", "-", "*", "/"};
+	static final String[] FUNCTIONS_LIST = {"sqrt", "root", "pow", "ln", "log", "logbase", "sin", "cos", "tan"};
 	
-	static final List<String> REQUIRES_ONE_ARG = Arrays.asList(new String[]{"sqrt", "sin", "cos", "tan"});
-	static final List<String> REQUIRES_TWO_ARGS = Arrays.asList(new String[]{"root", "pow"});
-	// all functions that do not occur in these arrays can accept either one or two arguments
+	static final List<String> ONE_ARG_FUNCTIONS_LIST = Arrays.asList(new String[]{"sqrt", "ln", "log", "sin", "cos", "tan"});
+	static final List<String> TWO_ARGS_FUNCTIONS_LIST = Arrays.asList(new String[]{"root", "pow", "logbase"});
 
 	String data;
 	Node left = null;
@@ -46,8 +46,14 @@ class Node {
 
     
     boolean isSymbol() {
-    	for (String operator : ALL_SYMBOLS_LIST) {
+    	for (String operator : OPERATORS_LIST) {
     		if (this.data.equals(operator)) {
+    			return true;
+    		}
+    	}
+    	
+    	for (String function : FUNCTIONS_LIST) {
+    		if (this.data.equals(function)) {
     			return true;
     		}
     	}
@@ -73,7 +79,7 @@ class Node {
 		while (! this.isSplit() && ! Interpreter.error) {
 			this.splitAtSymbol(new String[]{"+", "-"}, OPERATOR);
 			this.splitAtSymbol(new String[]{"*", "/"}, OPERATOR);
-			this.splitAtSymbol(ALL_FUNCTIONS_LIST, FUNCTION);
+			this.splitAtSymbol(FUNCTIONS_LIST, FUNCTION);
 			
 		}
 	}
@@ -93,8 +99,8 @@ class Node {
 			} else if (this.data.charAt(i) == ')') {
 				closePar++;
 			} else {
-				for (char c : ALL_OPERATORS_LIST) {
-					if (openPar == closePar && this.data.length() > 1 && this.data.charAt(i) == c) {
+				for (String s : OPERATORS_LIST) {
+					if (openPar == closePar && this.data.length() > 1 && this.data.charAt(i) == s.charAt(0)) {
 						return false;
 					}
 				}
@@ -195,7 +201,7 @@ class Node {
 				boolean isValidFunctionName = false;
 				
 				// check if function name is valid
-				for (String f : ALL_FUNCTIONS_LIST) {
+				for (String f : FUNCTIONS_LIST) {
 					if (functionName.equals(f)) {
 						isValidFunctionName = true;
 						break;
@@ -240,12 +246,12 @@ class Node {
 					if (arg1.length() == 0) {
 						Error.notEnoughArguments(functionName);
 					} else {		
-						if (REQUIRES_ONE_ARG.contains(functionName)) {					
+						if (ONE_ARG_FUNCTIONS_LIST.contains(functionName)) {					
 							// functions that take only one argument
 							if (arg2.length() != 0) {
 								Error.tooManyArguments(functionName);
 							}
-						} else if (REQUIRES_TWO_ARGS.contains(functionName)) {
+						} else if (TWO_ARGS_FUNCTIONS_LIST.contains(functionName)) {
 							// functions that take only two arguments
 							if (arg2.length() == 0) {
 								Error.notEnoughArguments(functionName);
