@@ -1,12 +1,15 @@
 package ui;
 
 import com.sun.tools.javac.Main;
+import graphing.CreateGraph;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import javax.swing.*;
 
@@ -16,17 +19,37 @@ public class JFrameWindow {
 		initialize();
 	}
 
-	//Interpreter should log the tree to this variable so it can be added to the UI Textarea
+	public Color greenColor;
+	public Color blueColor;
+	public Color redColor;
+
+	//Interpreter should log the tree to this variable, so it can be added to the UI Textarea
 	//Default is empty
 	public static String treeText = "";
 
-	//Interpreter should log the error to this variable so it can be added to the UI Textarea
-	// if no errors this is default:
+	//Interpreter should log the error to this variable, so it can be added to the UI Textarea
+	//if no errors this is default:
 	public static String errorText = "No errors :)";
 
+	JFreeChart chart;
+	ArrayList<String> lines;
+	int xAxisIndex;
+
 	public void initialize() {
+		//Set standard colors for UI
+		float[] greenHSB = new float[3];
+		Color.RGBtoHSB(116, 255, 190, greenHSB);
+		greenColor = Color.getHSBColor(greenHSB[0], greenHSB[1], greenHSB[2]);
+		float[] blueHSB = new float[3];
+		Color.RGBtoHSB(116, 153, 255, blueHSB);
+		blueColor = Color.getHSBColor(blueHSB[0], blueHSB[1], blueHSB[2]);
+		float[] redHSB = new float[3];
+		Color.RGBtoHSB(255, 134, 116, redHSB);
+		redColor = Color.getHSBColor(redHSB[0], redHSB[1], redHSB[2]);
+
+
 		frame = new JFrame();
-		frame.setTitle("Main Window");
+		frame.setTitle("CML");
 		frame.setLocationRelativeTo(null);
 		frame.setPreferredSize(new Dimension(800, 500));
 
@@ -35,15 +58,10 @@ public class JFrameWindow {
 		frame.setPreferredSize(new Dimension(800, 500));
 		frame.setMinimumSize(new Dimension(800, 500));
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		/*JButton button1 = new JButton("Button 1");
 
-		button1.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				button1Pressed(e);
-			}
-		});
-		panel.add(button1);*/
+		ResizeListener resizeListener = new ResizeListener(this);
+		frame.addComponentListener(resizeListener);
+
 		AddComponentsToPane(frame.getContentPane());
 		frame.pack();
 		frame.setVisible(true);
@@ -56,10 +74,10 @@ public class JFrameWindow {
 
 		c.gridx = 3;
 		c.gridy = 0;
-		c.anchor = GridBagConstraints.FIRST_LINE_START;
+		c.anchor = GridBagConstraints.SOUTHWEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 0.5;
-		c.weighty = 0.1;
+		c.weighty = 0.025;
 		JLabel rulesLabel = new JLabel("RULES:");
 		pane.add(rulesLabel, c);
 
@@ -71,13 +89,11 @@ public class JFrameWindow {
 		c.gridx = 3;
 		c.gridy = 1;
 		c.weightx = 0.5;
-		c.weighty = 0.4;
+		c.weighty = 0.5;
 		c.fill = GridBagConstraints.BOTH;
 		JTextArea rulesText = new JTextArea(0,0);
 		JScrollPane rulesScrollPane = new JScrollPane(rulesText);
 		pane.add(rulesScrollPane, c);
-
-
 
 		c.gridx = 4;
 		c.gridy = 1;
@@ -107,8 +123,14 @@ public class JFrameWindow {
 		pane.add(treeScrollPane, c);
 	}
 
-	public void updateGraph(JFreeChart chart, ArrayList<String> lines, int xAxisIndex){
+	public void setGraph(JFreeChart c, ArrayList<String> setLines, int setXAxisIndex){
+		chart = c;
+		lines = setLines;
+		xAxisIndex = setXAxisIndex;
+		updateGraph();
+	}
 
+	public void updateGraph(){
 		ChartPanel addPanel = new ChartPanel(chart);
 		addPanel.setBackground(Color.GREEN);
 		addPanel.setSize(frame.getWidth()/2, frame.getHeight()/2);
@@ -123,6 +145,22 @@ public class JFrameWindow {
 		c.ipady = frame.getHeight()/2;
 		c.ipadx = frame.getWidth()/2;
 		c.anchor = GridBagConstraints.FIRST_LINE_START;
+		addPanel.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				c.gridx = 0;
+				c.gridy = 0;
+				c.gridheight = 2;
+				c.gridwidth = 2;
+				c.weightx = 0.5;
+				c.weighty = 0.5;
+				c.ipady = frame.getHeight()/2;
+				c.ipadx = frame.getWidth()/2;
+				c.anchor = GridBagConstraints.FIRST_LINE_START;
+				frame.getContentPane().add(addPanel, c);
+				frame.setVisible(true);
+			}
+		});
 		frame.getContentPane().add(addPanel, c);
 
 
@@ -147,11 +185,45 @@ public class JFrameWindow {
 		JLabel xAxisLabel = new JLabel("X-axis: ");
 		enabledLines.add(xAxisLabel);
 
+		//MAKE COMBO BOX WITH ALL LINES AS OPTIONS FOR XAXIS
+		JComboBox comboBox = new JComboBox();
+
+		enabledLines.add(comboBox);
+
+		//ADD ITERATIONS TEXT INPUT
+
+		JButton runButton = new JButton("RUN");
+		runButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				CreateGraph.generateChart();
+				setGraph(CreateGraph.currentChart, CreateGraph.lineNames, 0);
+			}
+		});
+		enabledLines.add(runButton, c);
+
+		enabledLines.addComponentListener(new ComponentAdapter(){
+			@Override
+			public void componentResized(ComponentEvent e) {
+				c.gridx = 0;
+				c.gridy = 3;
+				c.gridheight = 1;
+				c.gridwidth = 1;
+				c.weightx = 0.2;
+				c.weighty = 0.2;
+				c.ipady = 0;
+				c.ipadx = 0;
+				c.anchor = GridBagConstraints.FIRST_LINE_START;
+				frame.getContentPane().add(enabledLines, c);
+				frame.setVisible(true);
+			}
+		});
+
+		//Find better color for improved oversight in app
+		enabledLines.setBackground(greenColor);
+
 		frame.getContentPane().add(enabledLines, c);
 		frame.pack();
-	}
-
-	public void button1Pressed(ActionEvent actionEvent){
-		System.out.println("Button1 pressed :)");
+		frame.setVisible(true);
 	}
 }
