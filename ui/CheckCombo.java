@@ -9,7 +9,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.event.PopupMenuEvent;
+
 class CheckCombo implements ActionListener {
+
+
     public void actionPerformed(ActionEvent e) {
         JComboBox cb = (JComboBox) e.getSource();
         CheckComboStore store = (CheckComboStore) cb.getSelectedItem();
@@ -17,7 +22,7 @@ class CheckCombo implements ActionListener {
         ccr.checkBox.setSelected((store.state = !store.state));
     }
 
-    public JPanel setComboBox(ArrayList<String> lines, int xAxisIndex) {
+    public JPanel setComboBox(ArrayList<String> lines, int xAxisIndex, Color color, int maxWidth, int maxHeight) {
         CheckComboStore[] stores = new CheckComboStore[lines.size()-1];
         boolean xAxis = false;
         for (int i = 0; i < lines.size(); i++)
@@ -28,10 +33,16 @@ class CheckCombo implements ActionListener {
             }
             stores[xAxis ? i-1 : i] = new CheckComboStore(lines.get(i), true);
         }
+        System.out.println("X-axis index: " + xAxisIndex);
         JComboBox combo = new JComboBox(stores);
         combo.setRenderer(new CheckComboRenderer());
         combo.addActionListener(this);
+        combo.addPopupMenuListener(new ComboBoxPopupMenuListener(maxWidth, maxHeight, combo.getHeight(), combo.getWidth(), combo));
+
+        combo.setPreferredSize(new Dimension(maxWidth,maxHeight));
+
         JPanel panel = new JPanel();
+        panel.setBackground(color);
         panel.add(combo);
         return panel;
     }
@@ -62,5 +73,33 @@ class CheckComboStore {
     public CheckComboStore(String id, Boolean state) {
         this.id = id;
         this.state = state;
+    }
+}
+
+class ComboBoxPopupMenuListener implements PopupMenuListener {
+    int expandedWidth;
+    int expandedHeight;
+    int width;
+    int height;
+    JComboBox comboBox;
+    ComboBoxPopupMenuListener(int eW, int eH, int w, int h, JComboBox cb){
+        expandedWidth = eW;
+        expandedHeight = eH;
+        width = w;
+        height = h;
+        comboBox = cb;
+    }
+    public void popupMenuCanceled(PopupMenuEvent popupMenuEvent) {
+        System.out.println("Canceled");
+    }
+
+    public void popupMenuWillBecomeVisible(PopupMenuEvent popupMenuEvent) {
+        //comboBox.setPreferredSize(new Dimension(width, height));
+        System.out.println(comboBox.getName() + " visible");
+    }
+
+    public void popupMenuWillBecomeInvisible(PopupMenuEvent popupMenuEvent) {
+        //comboBox.setPreferredSize(new Dimension(expandedWidth, expandedHeight));
+        System.out.println(comboBox.getName() + " invisible");
     }
 }

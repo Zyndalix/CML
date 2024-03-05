@@ -98,7 +98,7 @@ public class CreateGraph {
 
             public void setGraph()
             {
-                appWindow.setGraph(currentChart, lineNames, 0);
+                appWindow.setGraph(currentChart, lineNames, 1);
             }
         });
     }
