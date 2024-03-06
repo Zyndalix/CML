@@ -1,6 +1,7 @@
 package ui;
 
 import com.sun.tools.javac.Main;
+import graphing.CreateGraph;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
@@ -20,6 +21,9 @@ class CheckCombo implements ActionListener {
         CheckComboStore store = (CheckComboStore) cb.getSelectedItem();
         CheckComboRenderer ccr = (CheckComboRenderer) cb.getRenderer();
         ccr.checkBox.setSelected((store.state = !store.state));
+
+        CreateGraph.appWindow.enabledLines.set(cb.getSelectedIndex(), store.state);
+        System.out.print("Setting visiblity of line " + store.id + " to " + store.state);
     }
 
     public JPanel setComboBox(ArrayList<String> lines, int xAxisIndex, Color color, int maxWidth, int maxHeight) {
@@ -37,8 +41,6 @@ class CheckCombo implements ActionListener {
         JComboBox combo = new JComboBox(stores);
         combo.setRenderer(new CheckComboRenderer());
         combo.addActionListener(this);
-        combo.addPopupMenuListener(new ComboBoxPopupMenuListener(maxWidth, maxHeight, combo.getHeight(), combo.getWidth(), combo));
-
         combo.setPreferredSize(new Dimension(maxWidth,maxHeight));
 
         JPanel panel = new JPanel();

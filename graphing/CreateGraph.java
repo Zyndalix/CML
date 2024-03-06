@@ -1,6 +1,8 @@
 package graphing;
 
 import interpreter.Interpreter;
+import interpreter.Node;
+import interpreter.Variable;
 import org.jfree.chart.*;
 import java.io.*;
 import java.util.*;
@@ -24,17 +26,12 @@ public class CreateGraph {
     public static JFrameWindow appWindow;
     public static JFreeChart currentChart;
     public static ArrayList<String> lineNames;
-    public static JFreeChart setData(ArrayList<ArrayList<String>> chartData, int iterations, int xAxisIndex) {
-        System.out.print("Test");
-
-        //First get values to compare in chart from UI
-        //Now just sets the first variable to X and second to Y, the rest is skipped
-        //Now makes standard legend with one line called "Line name", should be made customizable
-        XYDataset dataset = reiterateChartData(chartData, iterations, xAxisIndex);
+    public static JFreeChart setData(ArrayList<ArrayList<String>> chartData, int iterations) {
+        XYDataset dataset = reiterateChartData(chartData, iterations);
         return(createChart(dataset));
     }
 
-    public static XYDataset reiterateChartData(ArrayList<ArrayList<String>> chartData, int iterations, int xAxisIndex){
+    public static XYDataset reiterateChartData(ArrayList<ArrayList<String>> chartData, int iterations){
 
         //Add values from chosen variables to dataset
         XYSeriesCollection newData = new XYSeriesCollection();
@@ -44,10 +41,10 @@ public class CreateGraph {
 
         for(int i = 0; i < chartData.size(); i++){
             lines.add(new XYSeries(chartData.get(i).get(0)));
-            if(i == xAxisIndex)
+            if(i == appWindow.xAxisIndex)
                 continue;
             for (int j = 1; j < iterations; j++){
-                lines.get(i).add(Double.parseDouble(chartData.get(xAxisIndex).get(j)), Double.parseDouble(chartData.get(i).get(j)));
+                lines.get(i).add(Double.parseDouble(chartData.get(appWindow.xAxisIndex).get(j)), Double.parseDouble(chartData.get(i).get(j)));
             }
             newData.addSeries(lines.get(i));
         }
@@ -71,46 +68,55 @@ public class CreateGraph {
 
     public static void generateChart(){
         //Check UI for iterations, 1000 is default for now
-        int iterations = 1000;
+
+        int iterations = appWindow.iterationsText == null ? 5 : Integer.parseInt(appWindow.iterationsText.getText());;
+
+        lineNames = new ArrayList<String>();
 
         ArrayList<ArrayList<String>> chartData = interpretData(iterations);
-        for (int i = 0; i< chartData.size(); i++)
-            lineNames.add(chartData.get(i).get(0));
-        //Change variable on x-axis through UI, default = 0 for now
-        int xAxisIndex = 0;
+        System.out.print("Generated chart data: " + chartData);
 
-        currentChart = setData(chartData,iterations, xAxisIndex);
+        for (ArrayList<String> chartDatum : chartData) lineNames.add(chartDatum.get(0));
+        currentChart = setData(chartData, iterations);
     }
 
     public static void setUpUI(){
-
-        lineNames = new ArrayList<String>();
         // following two lines are not important
         String s = UIManager.getSystemLookAndFeelClassName();
-        System.out.println(s);
+        System.out.print(s);
 
-        // boilerplate code needed for setting up the window, don't delete
+        if (appWindow == null)
+            CreateWindow();
+    }
+
+    static void CreateWindow(){
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 appWindow = new JFrameWindow();
+                appWindow.loadSavedText();
+                generateChart();
                 setGraph();
             }
 
             public void setGraph()
             {
-                appWindow.setGraph(currentChart, lineNames, 1);
+                appWindow.setGraph(currentChart, lineNames);
             }
         });
     }
 
     private static ArrayList<ArrayList<String>> interpretData(int iterations){
         String variables = getContentsOfFile("variables");
+        System.out.print("\nVariables: "+ variables);
         String rules = getContentsOfFile("rules");
-
+        System.out.print("\nRules: "+ rules);
+        Interpreter.data.clear();
+        Variable.list.clear();
+        Node.list.clear();
         return Interpreter.interpret(variables, rules, iterations);
     }
 
-    static String getContentsOfFile(String file) {
+    public static String getContentsOfFile(String file) {
         String data = new String();
         try {
             Scanner scanner = new Scanner( new File(file) );

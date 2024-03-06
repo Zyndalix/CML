@@ -1,9 +1,2 @@
-'This file is meant to be used during the development stage.
-
-'x = (5 - 2) * ((4 - x) * 1/2) 'this is a comment
-'y = 8 / 2 + 25 * 1 + 5 + z + x ' this is yet another comment
-'z = ((2 - 1) * (4 - 2) * (5 - 2)) / (2 + 2)
-'z = 2 + (sqrt(((2+2)+4) * 3, 2) * 3)
-xlangerenaamtesttestest = xlangerenaamtesttestest  + 0.01
-y = 2 * xlangerenaamtesttestest
-z = 2 * xlangerenaamtesttestest + 1
+x = x + 1
+y = x + 1 *(x+2)*(2*3*x*x)

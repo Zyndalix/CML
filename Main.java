@@ -22,7 +22,6 @@ public class Main {
 
 	public static void main(String[] args) {
 		CreateGraph.setUpUI();
-		CreateGraph.generateChart();
 	}
 
 
