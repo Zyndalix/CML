@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 class Variable {
 
-	static ArrayList<Variable> list = new ArrayList<Variable>();
+	static ArrayList<Variable> list;
 	
 	// returns the variable that has the given name
 	static Variable get(String searchName) {

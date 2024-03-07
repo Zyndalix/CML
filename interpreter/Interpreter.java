@@ -5,9 +5,8 @@ import java.util.ArrayList;
 public class Interpreter {
 
 	// this becomes true if an error is encountered; functions of the interpreter will then not execute
-	static boolean error = false;
-	static ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-	static int numberOfTimesSplit = 0;
+	static boolean error;
+	static ArrayList<ArrayList<String>> data;
 
 	static void debugPrint() {
 		for (Variable v : Variable.list) {
@@ -20,15 +19,16 @@ public class Interpreter {
 			n.print();
 		}
 		
-		// uncomment this for an interesting statistic
-		//System.out.println("Number of times the splitAtSymbol() function has been called: " + numberOfTimesSplit);
-		
 		System.out.println(data);
 	}
 	
 	
 	public static ArrayList<ArrayList<String>> main(String variables, String rules, int iterations) {
 		// pre-interpreting tasks are performed here
+		error = false;
+		data = new ArrayList<ArrayList<String>>();
+		Node.list = new ArrayList<Node>();
+		Variable.list = new ArrayList<Variable>();
 		variables = Parser.prepare(variables);
 		rules = Parser.prepare(rules);
 

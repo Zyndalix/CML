@@ -5,7 +5,7 @@ import java.util.ArrayList;
 // this is for the abstract syntax tree; each rule has its own binary tree
 class Node {
 
-	static ArrayList<Node> list = new ArrayList<Node>();
+	static ArrayList<Node> list;
 
 	String data;
 	Node left = null;
@@ -58,7 +58,6 @@ class Node {
 
 	void split() {		
 		while (! this.isSplit() && ! Interpreter.error) {
-			Interpreter.numberOfTimesSplit++;
 			this.splitAtOperator(new char[]{'+', '-'});
 			this.splitAtOperator(new char[]{'*', '/'});
 			this.splitAtFunction(new String[]{"sqrt", "root", "pow", "ln", "log", "logbase", "sin", "cos", "tan"});
