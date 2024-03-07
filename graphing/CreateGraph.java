@@ -22,26 +22,34 @@ import ui.JFrameWindow;
 import javax.swing.*;
 
 public class CreateGraph {
-
     public static JFrameWindow appWindow;
     public static JFreeChart currentChart;
     public static ArrayList<String> lineNames;
-    public static JFreeChart setData(ArrayList<ArrayList<String>> chartData, int iterations) {
-        XYDataset dataset = reiterateChartData(chartData, iterations);
+    public static int iterations;
+
+    public static ArrayList<ArrayList<String>> chartData;
+    public static JFreeChart setData() {
+        XYDataset dataset = reiterateChartData();
         return(createChart(dataset));
     }
 
-    public static XYDataset reiterateChartData(ArrayList<ArrayList<String>> chartData, int iterations){
-
-        //Add values from chosen variables to dataset
+    public static XYDataset reiterateChartData(){
         XYSeriesCollection newData = new XYSeriesCollection();
-
-        //Find a way to add more lines using the app's UI
         ArrayList<XYSeries> lines = new ArrayList<>();
+
+        boolean xAxis = false;
+        if(appWindow.enabledLines == null)
+        {
+            appWindow.enabledLines = new boolean[chartData.size()];
+            for(int i = 0; i < chartData.size(); i++){
+                appWindow.enabledLines[i] = true;
+            }
+        }
+
 
         for(int i = 0; i < chartData.size(); i++){
             lines.add(new XYSeries(chartData.get(i).get(0)));
-            if(i == appWindow.xAxisIndex)
+            if(i == appWindow.xAxisIndex || !appWindow.enabledLines[i])
                 continue;
             for (int j = 1; j < iterations; j++){
                 lines.get(i).add(Double.parseDouble(chartData.get(appWindow.xAxisIndex).get(j)), Double.parseDouble(chartData.get(i).get(j)));
@@ -52,9 +60,9 @@ public class CreateGraph {
     }
 
     public static JFreeChart createChart(XYDataset dataset){
-        return ChartFactory.createXYLineChart(
+        JFreeChart chart = ChartFactory.createXYLineChart(
                 "",
-                "",
+                lineNames.get(appWindow.xAxisIndex),
                 "",
                 dataset,
                 PlotOrientation.VERTICAL,
@@ -62,22 +70,17 @@ public class CreateGraph {
                 false,
                 false
         );
+        return chart;
     }
 
 
 
     public static void generateChart(){
-        //Check UI for iterations, 1000 is default for now
-
-        int iterations = appWindow.iterationsText == null ? 5 : Integer.parseInt(appWindow.iterationsText.getText());;
-
-        lineNames = new ArrayList<String>();
-
-        ArrayList<ArrayList<String>> chartData = interpretData(iterations);
-        System.out.print("Generated chart data: " + chartData);
-
+        iterations = Integer.parseInt(appWindow.iterationsTextString);
+        lineNames = new ArrayList<>();
+        chartData = interpretData(iterations);
         for (ArrayList<String> chartDatum : chartData) lineNames.add(chartDatum.get(0));
-        currentChart = setData(chartData, iterations);
+        currentChart = setData();
     }
 
     public static void setUpUI(){
@@ -127,8 +130,7 @@ public class CreateGraph {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Could not open file");
-            e.printStackTrace();
+            System.out.println("Could not open file: " + file);
         }
         return data;
     }

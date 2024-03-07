@@ -3,9 +3,9 @@ package interpreter;
 import java.util.LinkedList;
 
 // this is for the abstract syntax tree; each rule has its own binary tree
-class Node {
+public class Node {
 
-	static LinkedList<Node> list = new LinkedList<Node>();
+	public static LinkedList<Node> list = new LinkedList<Node>();
 	
 	// modes for the splitAtSymbol() function
 	static final int OPERATOR = 0;

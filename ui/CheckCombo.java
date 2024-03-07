@@ -13,20 +13,10 @@ import javax.swing.*;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.event.PopupMenuEvent;
 
-class CheckCombo implements ActionListener {
+class CheckCombo{
 
-
-    public void actionPerformed(ActionEvent e) {
-        JComboBox cb = (JComboBox) e.getSource();
-        CheckComboStore store = (CheckComboStore) cb.getSelectedItem();
-        CheckComboRenderer ccr = (CheckComboRenderer) cb.getRenderer();
-        ccr.checkBox.setSelected((store.state = !store.state));
-
-        CreateGraph.appWindow.enabledLines.set(cb.getSelectedIndex(), store.state);
-        System.out.print("Setting visiblity of line " + store.id + " to " + store.state);
-    }
-
-    public JPanel setComboBox(ArrayList<String> lines, int xAxisIndex, Color color, int maxWidth, int maxHeight) {
+    static JPanel currentPanel;
+    public static JPanel setComboBox(ArrayList<String> lines, int xAxisIndex, Color color, int maxWidth, int maxHeight) {
         CheckComboStore[] stores = new CheckComboStore[lines.size()-1];
         boolean xAxis = false;
         for (int i = 0; i < lines.size(); i++)
@@ -35,18 +25,38 @@ class CheckCombo implements ActionListener {
                 xAxis = true;
                 continue;
             }
-            stores[xAxis ? i-1 : i] = new CheckComboStore(lines.get(i), true);
+            stores[xAxis ? i-1 : i] = new CheckComboStore(lines.get(i), CreateGraph.appWindow.enabledLines[xAxis ? i-1 : i]);
         }
         System.out.println("X-axis index: " + xAxisIndex);
         JComboBox combo = new JComboBox(stores);
         combo.setRenderer(new CheckComboRenderer());
-        combo.addActionListener(this);
-        combo.setPreferredSize(new Dimension(maxWidth,maxHeight));
+        combo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JComboBox cb = (JComboBox) e.getSource();
+                CheckComboStore store = (CheckComboStore) cb.getSelectedItem();
+                CheckComboRenderer ccr = (CheckComboRenderer) cb.getRenderer();
+                ccr.checkBox.setSelected((store.state = !store.state));
 
-        JPanel panel = new JPanel();
-        panel.setBackground(color);
-        panel.add(combo);
-        return panel;
+                int s = cb.getSelectedIndex();
+                if(s>= xAxisIndex) s++;
+                CreateGraph.appWindow.enabledLines[s] = store.state;
+                System.out.print("Setting visiblity of line " + store.id + "/"+ s + " to " + store.state);
+                CreateGraph.appWindow.setLineVisibility();
+            }
+        });
+        combo.setPreferredSize(new Dimension(maxWidth,maxHeight));
+        if(currentPanel == null){
+            System.out.print("Making panel for y-axis combo box");
+            currentPanel = new JPanel();
+            currentPanel.setBackground(color);
+            currentPanel.add(combo);
+            return currentPanel;
+        }
+        System.out.print("Refreshing y-axis combo box");
+        currentPanel.remove(0);
+        currentPanel.add(combo);
+        return currentPanel;
     }
 }
 

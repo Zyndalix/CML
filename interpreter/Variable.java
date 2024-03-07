@@ -2,9 +2,9 @@ package interpreter;
 
 import java.util.LinkedList;
 
-class Variable {
+public class Variable {
 
-	static LinkedList<Variable> list = new LinkedList<Variable>();
+	public static LinkedList<Variable> list = new LinkedList<Variable>();
 	
 	// returns the variable that has the given name
 	static Variable get(String searchName) {

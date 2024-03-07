@@ -6,7 +6,7 @@ public class Interpreter {
 
 	// this becomes true if an error is encountered; functions of the interpreter will then not execute
 	static boolean error = false;
-	static ArrayList<ArrayList<String>> data = new ArrayList<>();
+	public static ArrayList<ArrayList<String>> data = new ArrayList<>();
 	static int numberOfTimesSplit = 0;
 
 	static void debugPrint() {
