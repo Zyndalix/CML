@@ -36,19 +36,21 @@ public class Interpreter {
 		Parser.extract(variables, Parser.VARIABLES);
 		Parser.extract(rules, Parser.RULES);
 		
-		// prepare the data array
+		// prepare the data array, and create an initial snapshot of all variables
 		for (int i = 0; i < Variable.list.size(); i++) {
 			data.add(new ArrayList<String>());
 			data.get(i).add(Variable.list.get(i).name);
+			data.get(i).add(Double.toString(Variable.list.get(i).value));
 		}
 
 		// calculate variables according to rules		
-		for (int iter = 0; iter < iterations && ! error; iter++) {
+		// first iteration has been run already, that's why it starts at 1
+		for (int iter = 1; iter < iterations && ! error; iter++) {
 			for (int i = 0; i < Node.list.size() && ! error; i++) {
 				Executer.executeRule(Node.list.get(i));
 			}
 			
-			// create a snapshot of all variables
+			// create a snapshot of all variables during every iteration
 			for (int i = 0; i < Variable.list.size() && ! error; i++) {
 				data.get(i).add(Double.toString(Variable.list.get(i).value));
 			}
