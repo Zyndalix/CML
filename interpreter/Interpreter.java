@@ -23,7 +23,7 @@ public class Interpreter {
 	}
 	
 	
-	public static ArrayList<ArrayList<String>> main(String variables, String rules, int iterations) {
+	public static ArrayList<ArrayList<String>> interpret(String variables, String rules, int iterations) {
 		// pre-interpreting tasks are performed here
 		error = false;
 		data = new ArrayList<ArrayList<String>>();
@@ -38,7 +38,7 @@ public class Interpreter {
 		
 		// prepare the data array, and create an initial snapshot of all variables
 		for (int i = 0; i < Variable.list.size(); i++) {
-			data.add(new ArrayList<String>());
+			data.add(new ArrayList<>());
 			data.get(i).add(Variable.list.get(i).name);
 			data.get(i).add(Double.toString(Variable.list.get(i).value));
 		}

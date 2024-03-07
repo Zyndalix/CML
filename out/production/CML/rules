@@ -1,0 +1,4 @@
+x=x+1
+z=sin(x)/cos(x)
+a=tan(x)/z
+y = x

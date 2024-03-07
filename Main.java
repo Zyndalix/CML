@@ -1,36 +1,26 @@
 import interpreter.*;
+import graphing.*;
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.util.ArrayList;
 
+//UI
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
-class Main {
+import org.jfree.chart.JFreeChart;
+import ui.*;
 
-	static String getContentsOfFile(String file) {
-		String data = new String();
-		try {
-			Scanner scanner = new Scanner( new File(file) );
-			while (scanner.hasNextLine()) {
-				data = data.concat(scanner.nextLine());
-				if (scanner.hasNextLine()) {
-					data = data.concat("\n");
-				}
-			}
-		} catch (FileNotFoundException e) {
-			System.out.println("Could not open file");
-			e.printStackTrace();
-		}
-		return data;
-	}
+
+public class Main {
+
+	public static Runnable UIThread;
+
 
 	public static void main(String[] args) {
-
-		String variables = getContentsOfFile("variables");
-		String rules = getContentsOfFile("rules");
-		int iterations = 10;
-
-		ArrayList<ArrayList<String>> chartData = Interpreter.main(variables, rules, iterations);
+		CreateGraph.setUpUI();
 	}
 }

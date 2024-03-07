@@ -2,7 +2,7 @@ package interpreter;
 
 import java.util.ArrayList;
 
-class Variable {
+public class Variable {
 
 	static ArrayList<Variable> list;
 	

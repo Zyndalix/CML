@@ -3,7 +3,7 @@ package interpreter;
 import java.util.ArrayList;
 
 // this is for the abstract syntax tree; each rule has its own binary tree
-class Node {
+public class Node {
 
 	static ArrayList<Node> list;
 

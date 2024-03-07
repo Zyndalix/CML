@@ -20,7 +20,8 @@ User Interface:
 	- Syntax highlighting
 
 Graph:
-	- find suitable graphing lib
+	- find suitable graphing lib -> JFreeChart
+	- add functions to change graphs according to UI (choose variables to graph, change scale of graph)
 
 Interpreter:
 	- prepare():
