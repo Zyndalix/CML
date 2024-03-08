@@ -63,7 +63,7 @@ class Executer {
 		} else if (equation.data.equals("pow")) {
 			result = Math.pow(left, right);
 		} else if (equation.data.equals("log")) {
-			result = Math.log(right) / Math.log(10);
+			result = Math.log(left) / Math.log(10);
 		} else if (equation.data.equals("logbase")) {
 			result = Math.log(right) / Math.log(left);
 		} else if (equation.data.equals("ln")) {
