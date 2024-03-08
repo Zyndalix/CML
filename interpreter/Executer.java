@@ -4,16 +4,13 @@ class Executer {
 
 	static void executeRule(Node rule) {
 		if (rule.data == "=") {
-			// get the variable that the rule applies to
-			Variable varToModify = Variable.get(rule.left.data);
-			
 			// calculate the new value of the variable
-			if (varToModify != null) {
-				varToModify.value = getValue(rule.right);
+			Variable varToTest = Variable.get(rule.left.data);
+			if (varToTest != null) {
+				varToTest.value = getValue(rule.right);
 			} else {
 				Error.noSuchVariable(rule.left.data);
 			}
-			
 		}
 	}
 	
@@ -22,14 +19,15 @@ class Executer {
 		if (! n.isSymbol()) {
 			if (n.isNumber()) {
 				value = Double.parseDouble(n.data);
-			} else {
+			} else if (Variable.get(n.data) != null) {
 				// n is probably a variable, test to see if variable exists
-				Variable varToTest = Variable.get(n.data);
-				if (varToTest != null) {
-					value = varToTest.value;
-				} else {
-					Error.noSuchVariable(n.data);
-				}
+				value = Variable.get(n.data).value;
+			} else if (n.data.equals("e")) {
+				value = Math.exp(1);
+			} else if (n.data.equals("pi") || n.data.equals("π")) {
+				value = Math.PI;
+			} else {
+				Error.noSuchVariable(n.data);
 			}
 		} else {
 			value = calculate(n);
@@ -65,7 +63,7 @@ class Executer {
 		} else if (equation.data.equals("pow")) {
 			result = Math.pow(left, right);
 		} else if (equation.data.equals("log")) {
-			result = Math.log(right) / Math.log(10);
+			result = Math.log(left) / Math.log(10);
 		} else if (equation.data.equals("logbase")) {
 			result = Math.log(right) / Math.log(left);
 		} else if (equation.data.equals("ln")) {
