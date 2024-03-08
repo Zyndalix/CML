@@ -1,33 +1,7 @@
-User Interface:
-	- Text box where the user can input code
-	- Text box where the user inputs the amount of runs
-	- Buttons like 'Run'
-	
-	- Layout:
-	-------------------------------------
-	|				|			|		|
-	| 	Graph		|	Rules	| Vars  |
-	|				|			|		|
-	|				|			|		|
-	-------------------------------------
-	|				|					|
-	|	Errors		|	Advanced Box:	|
-	|				|	Show AST		|
-	|				|					|
-	-------------------------------------
-
-	Eventually:
-	- Syntax highlighting
-
-Graph:
-	- find suitable graphing lib
-
 Interpreter:
-	- prepare():
-		- move comment handling to this function
-		- check if number of ( equals number of )
-		- add newline if needed
-	- parser and executer:
-		- support for log()
-		- support for e (euler's number)
-		- support for pi
+	- count ( and ) in raw rules string
+	- redesign the checking process:
+		- function that checks the raw strings
+		- function that checks the Variable.list
+		- function that checks the Node.list
+	- add a Rule class, with line numbers for error handling
