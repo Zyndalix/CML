@@ -41,8 +41,7 @@ class CheckCombo{
                 int s = cb.getSelectedIndex();
                 if(s>= xAxisIndex) s++;
                 CreateGraph.appWindow.enabledLines[s] = store.state;
-                System.out.print("Setting visiblity of line " + store.id + "/"+ s + " to " + store.state);
-                CreateGraph.appWindow.setLineVisibility();
+                CreateGraph.appWindow.setLineVisibility("Setting visiblity of line " + store.id + "/"+ s + " to " + store.state);
             }
         });
         combo.setPreferredSize(new Dimension(maxWidth,maxHeight));

@@ -5,18 +5,14 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.text.PlainDocument;
+import javax.swing.text.*;
 import java.io.*;
-import java.util.Objects;
 
 public class JFrameWindow {
 	private JFrame frame;
@@ -24,6 +20,7 @@ public class JFrameWindow {
 	//UI Buttons / combo boxes under graph
 	private JLabel yAxisLabel;
 	private JPanel yAxisPanel;
+    private Dimension cDim;
 	private JLabel xAxisLabel;
 	private JComboBox xAxisComboBox;
 	private JButton runButton;
@@ -50,6 +47,8 @@ public class JFrameWindow {
 	public Color blueColor;
 	public Color redColor;
 
+    public Color yellowColor;
+
 	public Color backgroundColor;
 
 	//Interpreter should log the tree to this variable, so it can be added to the UI Textarea
@@ -60,8 +59,10 @@ public class JFrameWindow {
 	//if no errors this is default:
 
     //Always start with a new line to not overlap text.
-	public static String errorText = "\n No errors :)";
-	private JTextArea consoleArea;
+	public static String errorText = "";
+	private JTextPane consolePane;
+    private StyledDocument consoleDoc;
+
 	JFreeChart chart;
 	ArrayList<String> lines;
     public boolean[] enabledLines;
@@ -70,7 +71,7 @@ public class JFrameWindow {
 	public void initialize() {
 		//Set standard colors for UI
 		float[] greenHSB = new float[3];
-		Color.RGBtoHSB(116, 255, 190, greenHSB);
+		Color.RGBtoHSB(19, 278, 104, greenHSB);
 		greenColor = Color.getHSBColor(greenHSB[0], greenHSB[1], greenHSB[2]);
 		float[] blueHSB = new float[3];
 		Color.RGBtoHSB(227, 255, 255, blueHSB);
@@ -78,6 +79,9 @@ public class JFrameWindow {
 		float[] redHSB = new float[3];
 		Color.RGBtoHSB(255, 134, 116, redHSB);
 		redColor = Color.getHSBColor(redHSB[0], redHSB[1], redHSB[2]);
+        float[] yellowHSB = new float[3];
+        Color.RGBtoHSB(255, 195, 115, yellowHSB);
+        yellowColor = Color.getHSBColor(yellowHSB[0], yellowHSB[1], yellowHSB[2]);
 
 		//Set background to green for now
 		backgroundColor = blueColor;
@@ -95,6 +99,8 @@ public class JFrameWindow {
 
 		ResizeListener resizeListener = new ResizeListener(this);
 		frame.addComponentListener(resizeListener);
+
+        cDim = new Dimension(frame.getWidth()/10,frame.getHeight()/15);
 
 		AddComponentsToPane(frame.getContentPane());
 		frame.pack();
@@ -146,32 +152,23 @@ public class JFrameWindow {
 
 		c.gridx = 0;
 		c.gridy = 4;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		c.weightx = 0.2;
-		c.weighty = 0.2;
-        c.ipadx = 0;
-        c.anchor = GridBagConstraints.FIRST_LINE_START;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		JLabel consoleLabel = new JLabel("CONSOLE:");
-		pane.add(consoleLabel, c);
-
-		c.gridx = 0;
-		c.gridy = 4;
 		c.gridheight = 2;
 		c.gridwidth = 1;
 		c.weightx = 1;
 		c.weighty = 1;
+        c.ipadx = 0;
         c.fill = GridBagConstraints.BOTH;
-		consoleArea = new JTextArea(0,0);
-		consoleArea.setEditable(false);
-		consoleArea.setText(errorText);
-		JScrollPane consoleScrollPane = new JScrollPane(consoleArea);
+        c.anchor = GridBagConstraints.FIRST_LINE_START;
+		consolePane = new JTextPane();
+		consolePane.setEditable(false);
+		consolePane.setText(errorText);
+        consoleDoc = consolePane.getStyledDocument();
+		JScrollPane consoleScrollPane = new JScrollPane(consolePane);
 		pane.add(consoleScrollPane, c);
 
 		c.gridx = 3;
 		c.gridy = 3;
-		c.gridheight = 2;
+		c.gridheight = 3;
 		c.gridwidth = 2;
         c.weightx = 0.5;
         c.weighty = 0.5;
@@ -192,16 +189,23 @@ public class JFrameWindow {
 		updateGraph();
 	}
 
-	public void logError(String err){
-		if(Objects.equals(errorText, "\n No errors :)")){
-			consoleArea.setText(err);
-		}
-		consoleArea.setForeground(redColor);
-		errorText = errorText.concat(err);
-		consoleArea.setText(errorText);
+	public void consoleLog(String err, int errorIndex){
+        Style style = consolePane.addStyle("I'm a Style", null);
 
-		consoleArea.repaint();
-		consoleArea.revalidate();
+        if(errorIndex == 0)
+            StyleConstants.setForeground(style, redColor);
+        if(errorIndex == 1)
+            StyleConstants.setForeground(style, yellowColor);
+        if(errorIndex == 2)
+            StyleConstants.setForeground(style, greenColor);
+
+        try { consoleDoc.insertString(consoleDoc.getLength(),"\n" + err,style); }
+        catch (BadLocationException e){
+            System.out.print("Couldnt print to console: " + err);
+        }
+
+		consolePane.repaint();
+		consolePane.revalidate();
 	}
 
 	public void getIterationsText(){
@@ -228,12 +232,14 @@ public class JFrameWindow {
 			c.anchor = GridBagConstraints.FIRST_LINE_START;
 			c.fill = GridBagConstraints.VERTICAL;
 			frame.getContentPane().add(addPanel, c);
-			System.out.print("Created first chart");
+			consoleLog("Created first chart", 2);
+            setXComboBox();
 		}
 		else{
-			System.out.print("Created new chart");
+			consoleLog("Created new chart", 2);
 			addPanel.setChart(chart);
 			addPanel.repaint();
+            setXComboBox();
 		}
 
 		if(setLines != null && setLines.getComponents().length != 0)
@@ -247,15 +253,18 @@ public class JFrameWindow {
 		updateYComboBox();
 		xAxisLabel = new JLabel("X-axis:");
 
-		setXComboBox();
 
         ActionListener xAxisActionListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				selectXAxis(xAxisComboBox.getSelectedIndex());
+                xAxisIndex = xAxisComboBox.getSelectedIndex() == -1 ? 0 : xAxisComboBox.getSelectedIndex();
+                //setXComboBox();
+                updateYComboBox();
+                setLineVisibility("Selected x-axis: " + lines.get(xAxisIndex));
 			}
 		};
-        xAxisComboBox.addActionListener(xAxisActionListener);
+
+		xAxisComboBox.addActionListener(xAxisActionListener);
 
 		runButton = new JButton("RUN");
 		runButton.addActionListener(new ActionListener() {
@@ -322,13 +331,13 @@ public class JFrameWindow {
             System.out.print("Saving file: " + saveName);
         } catch (IOException ex) {
             ex.printStackTrace();
-            System.err.println("Error saving file: " + ex.getMessage());
+            consoleLog("Error saving file: " + ex.getMessage(), 0);
         } finally {
             if (outFile != null) {
                 try {
                     outFile.close();
                 } catch (IOException e) {
-                    System.out.println("Couldn't save text to file " + saveName);
+                    consoleLog("Couldn't save text to file " + saveName, 0);
                 }
             }
         }
@@ -343,13 +352,13 @@ public class JFrameWindow {
 			System.out.print("Saving file: " + saveName);
 		} catch (IOException ex) {
 			ex.printStackTrace();
-			System.err.println("Error saving file: " + ex.getMessage());
+            consoleLog("Error saving file: " + ex.getMessage(), 0);
 		} finally {
 			if (outFile != null) {
 				try {
 					outFile.close();
 				} catch (IOException e) {
-					System.out.println("Couldn't save text to file " + saveName);
+                    consoleLog("Couldn't save text to file " + saveName, 0);
 				}
 			}
 		}
@@ -363,37 +372,38 @@ public class JFrameWindow {
 		getIterationsText();
     }
 
-    void selectXAxis(int index){
-        System.out.print("Selected x-axis: " + lines.get(index));
-        xAxisIndex = index;
-        updateYComboBox();
-    }
-
 	void setXComboBox(){
-		String[] lineNames = new String[lines.size()];
-		for(int i = 0; i<lines.size(); i++)
-			lineNames[i] = lines.get(i);
-		if(xAxisComboBox == null){
-			xAxisComboBox = new JComboBox(lineNames);
-			xAxisComboBox.setPreferredSize(new Dimension(frame.getWidth()/10,frame.getHeight()/15));
-			return;
-		}
-		xAxisComboBox.removeAllItems();
-        xAxisComboBox.addItem(lineNames);
+
+        if(xAxisComboBox == null){
+            xAxisComboBox = new JComboBox(lines.toArray());
+            xAxisComboBox.setPreferredSize(cDim);
+        }
+
+        DefaultComboBoxModel model =
+                (DefaultComboBoxModel)xAxisComboBox.getModel();
+
+        model.removeAllElements();
+        model.addAll(lines);
+
+
+        if(xAxisComboBox.getSelectedIndex() == -1)
+            xAxisComboBox.setSelectedIndex(0);
+        xAxisComboBox.repaint();
+        xAxisComboBox.revalidate();
 		updateYComboBox();
 	}
     void updateYComboBox(){
-        yAxisPanel = CheckCombo.setComboBox(lines, xAxisIndex, backgroundColor, frame.getWidth()/10,frame.getHeight()/15);
+        yAxisPanel = CheckCombo.setComboBox(lines, xAxisIndex, backgroundColor, cDim.width, cDim.height);
 		yAxisPanel.repaint();
 		yAxisPanel.revalidate();
     }
 
-	public void setLineVisibility(){
+	public void setLineVisibility(String log){
 		chart = CreateGraph.setData();
 		chart.setBackgroundPaint(backgroundColor);
 		chart.getLegend().setBackgroundPaint(backgroundColor);
-		System.out.print("Enabled/disabled line");
 		addPanel.setChart(chart);
 		addPanel.repaint();
+        consoleLog(log, 2);
 	}
 }

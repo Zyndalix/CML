@@ -1,4 +1,3 @@
-x=x+1
-z=sin(x)/cos(x)
-a=tan(x)/z
-y = x
+x=x+0.1
+y=y+x
+a=a+x

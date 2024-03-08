@@ -1,19 +1,12 @@
 package graphing;
 
 import interpreter.Interpreter;
-import interpreter.Node;
-import interpreter.Variable;
 import org.jfree.chart.*;
 import java.io.*;
 import java.util.*;
 
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtils;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.DomainOrder;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.general.DatasetChangeListener;
-import org.jfree.data.general.DatasetGroup;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -38,7 +31,7 @@ public class CreateGraph {
         ArrayList<XYSeries> lines = new ArrayList<>();
 
         boolean xAxis = false;
-        if(appWindow.enabledLines == null)
+        if(appWindow.enabledLines == null || appWindow.enabledLines.length != chartData.size())
         {
             appWindow.enabledLines = new boolean[chartData.size()];
             for(int i = 0; i < chartData.size(); i++){
@@ -52,7 +45,14 @@ public class CreateGraph {
             if(i == appWindow.xAxisIndex || !appWindow.enabledLines[i])
                 continue;
             for (int j = 1; j < iterations; j++){
-                lines.get(i).add(Double.parseDouble(chartData.get(appWindow.xAxisIndex).get(j)), Double.parseDouble(chartData.get(i).get(j)));
+                double xValue = Double.parseDouble(chartData.get(appWindow.xAxisIndex).get(j));
+                double yValue = Double.parseDouble(chartData.get(i).get(j));
+
+                if(!Double.isFinite(xValue) || !Double.isFinite(yValue)){
+                    appWindow.consoleLog("Not a valid number on (" + xValue + ", " + yValue + ")", 1);
+                    continue;
+                }
+                lines.get(i).add(xValue, yValue);
             }
             newData.addSeries(lines.get(i));
         }
@@ -110,12 +110,7 @@ public class CreateGraph {
 
     private static ArrayList<ArrayList<String>> interpretData(int iterations){
         String variables = getContentsOfFile("variables");
-        System.out.print("\nVariables: "+ variables);
         String rules = getContentsOfFile("rules");
-        System.out.print("\nRules: "+ rules);
-        Interpreter.data.clear();
-        Variable.list.clear();
-        Node.list.clear();
         return Interpreter.interpret(variables, rules, iterations);
     }
 
@@ -130,7 +125,7 @@ public class CreateGraph {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Could not open file: " + file);
+            appWindow.consoleLog("Could not open file: " + file, 0);
         }
         return data;
     }
