@@ -25,7 +25,8 @@ class Error {
 	}
 	
 	static void errorHandler(String place, int line, String symbol, String errorMsg) {
-		System.out.println(place + ":" + Integer.toString(line) + ": error: " + symbol + ": " + errorMsg);
+		Interpreter.errorBuffer = Interpreter.errorBuffer +
+			place + ":" + Integer.toString(line) + ": error: " + symbol + ": " + errorMsg + "\n";
 		Interpreter.error = true;
 	}
 	

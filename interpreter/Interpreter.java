@@ -6,9 +6,12 @@ public class Interpreter {
 
 	// this becomes true if an error is encountered; functions of the interpreter will then not execute
 	static boolean error;
+	public static String errorBuffer;
 	static ArrayList<ArrayList<String>> data;
 
 	static void debugPrint() {
+		System.out.println(errorBuffer);		
+		
 		for (Variable v : Variable.list) {
 			v.print();
 		}
@@ -26,6 +29,7 @@ public class Interpreter {
 	public static ArrayList<ArrayList<String>> main(String variables, String rules, int iterations) {
 		// pre-interpreting tasks are performed here
 		error = false;
+		errorBuffer = new String();
 		data = new ArrayList<ArrayList<String>>();
 		Node.list = new ArrayList<Node>();
 		Variable.list = new ArrayList<Variable>();
