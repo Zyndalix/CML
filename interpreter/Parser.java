@@ -3,8 +3,8 @@ package interpreter;
 class Parser {
 
 	// modes for the parse() function
-	static final int RULES = 0;
-	static final int VARIABLES = 1;
+	static final int VARIABLES = 0;
+	static final int RULES = 1;
 	
 	static String prepare(String input) {
 		// append a newline to the input string if there isn't one already,

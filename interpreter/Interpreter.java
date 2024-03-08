@@ -5,9 +5,8 @@ import java.util.ArrayList;
 public class Interpreter {
 
 	// this becomes true if an error is encountered; functions of the interpreter will then not execute
-	static boolean error = false;
-	public static ArrayList<ArrayList<String>> data = new ArrayList<>();
-	static int numberOfTimesSplit = 0;
+	static boolean error;
+	static ArrayList<ArrayList<String>> data;
 
 	static void debugPrint() {
 		for (Variable v : Variable.list) {
@@ -20,15 +19,16 @@ public class Interpreter {
 			n.print();
 		}
 		
-		// uncomment this for an interesting statistic
-		//System.out.println("Number of times the splitAtSymbol() function has been called: " + numberOfTimesSplit);
-		
 		System.out.println(data);
 	}
 	
 	
 	public static ArrayList<ArrayList<String>> interpret(String variables, String rules, int iterations) {
 		// pre-interpreting tasks are performed here
+		error = false;
+		data = new ArrayList<ArrayList<String>>();
+		Node.list = new ArrayList<Node>();
+		Variable.list = new ArrayList<Variable>();
 		variables = Parser.prepare(variables);
 		rules = Parser.prepare(rules);
 
@@ -36,19 +36,21 @@ public class Interpreter {
 		Parser.extract(variables, Parser.VARIABLES);
 		Parser.extract(rules, Parser.RULES);
 		
-		// prepare the data array
+		// prepare the data array, and create an initial snapshot of all variables
 		for (int i = 0; i < Variable.list.size(); i++) {
 			data.add(new ArrayList<>());
 			data.get(i).add(Variable.list.get(i).name);
+			data.get(i).add(Double.toString(Variable.list.get(i).value));
 		}
 
 		// calculate variables according to rules		
-		for (int iter = 0; iter < iterations && ! error; iter++) {
+		// first iteration has been run already, that's why it starts at 1
+		for (int iter = 1; iter < iterations && ! error; iter++) {
 			for (int i = 0; i < Node.list.size() && ! error; i++) {
 				Executer.executeRule(Node.list.get(i));
 			}
 			
-			// create a snapshot of all variables
+			// create a snapshot of all variables during every iteration
 			for (int i = 0; i < Variable.list.size() && ! error; i++) {
 				data.get(i).add(Double.toString(Variable.list.get(i).value));
 			}
