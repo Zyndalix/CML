@@ -22,13 +22,3 @@ User Interface:
 Graph:
 	- find suitable graphing lib -> JFreeChart
 	- add functions to change graphs according to UI (choose variables to graph, change scale of graph)
-
-Interpreter:
-	- prepare():
-		- move comment handling to this function
-		- check if number of ( equals number of )
-		- add newline if needed
-	- parser and executer:
-		- support for log()
-		- support for e (euler's number)
-		- support for pi
