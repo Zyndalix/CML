@@ -29,32 +29,6 @@ class Node {
         }
     }
 
-    
-    boolean isSymbol() {    	
-    	if (this.data.length() == 1 && isOperator(this.data.charAt(0))) {
-    		return true;
-    	}
-    	
-    	if (isOneArgFunction(this.data) || isTwoArgsFunction(this.data)) {
-    		return true;
-    	}
-    	
-    	return false;
-    }
-
-    
-    boolean isNumber() {
-    	boolean success = true;
-    	
-    	try {
-			Double.parseDouble(this.data);
-		} catch(NumberFormatException e) {
-			success = false;
-		}
-		
-		return success;
-    }
-
 
 	void split() {		
 		while (! this.isSplit() && ! Interpreter.error) {
@@ -66,20 +40,19 @@ class Node {
 
     
     private boolean isSplit() {
-		// keep track of how many parentheses of each type we have encountered, so we always know
-		// if we're in a parenthesized expression or not
-		int openPar = 0;
-		int closePar = 0;
+		// keep track of the net parentheses count: if it's positive, then we have encountered more
+		// opening than closing parentheses; the opposite is true for a negative value
+		int netParCount = 0;
 		
 		// first check if this node contains an unsplit string with an exterior operator 
 		// (i.e. not inside parentheses)
 		if (this.data.length() > 1) {
 			for (int i = 0; i < this.data.length(); i++) {
 				if (this.data.charAt(i) == '(') {
-					openPar++;
+					netParCount++;
 				} else if (this.data.charAt(i) == ')') {
-					closePar++;
-				} else if (openPar == closePar && isOperator(this.data.charAt(i))) {
+					netParCount--;
+				} else if (netParCount == 0 && Util.isOperator(this.data.charAt(i))) {
 					return false;
 				}
 			}
@@ -114,24 +87,23 @@ class Node {
 		char nextOperator = 0;
 		int indexOfNextOperator = -1;
 		boolean stop = false;
-		// keep track of how many parentheses of each type we have encountered, so we always know
-		// if we're in a parenthesized expression or not
-		int openPar = 0;
-		int closePar = 0;
+		// keep track of the net parentheses count: if it's positive, then we have encountered more
+		// opening than closing parentheses; the opposite is true for a negative value
+		int netParCount = 0;
 	
 		// now, iterate from back to forth till we detect any of the desired operators
 		// (supplied in the symbols[] array)
 		if (this.data.length() > 1) {
 			for (int i = this.data.length() - 1; i >= 0 && stop == false; i--) {		
 				if (this.data.charAt(i) == '(') {
-					openPar++;
+					netParCount++;
 				} else if (this.data.charAt(i) == ')') {
-					closePar++;
-				} else if (openPar == closePar) {
+					netParCount--;
+				} else if (netParCount == 0) {
 					for (char op : operators) {
 						// if we have encountered just as many '(' as ')', then the current position
 						// is very surely not inside a parenthesized expression
-						if ( this.data.charAt(i) == op && (i == 0 || ! isOperator(this.data.charAt(i - 1))) ) {
+						if ( this.data.charAt(i) == op && (i == 0 || ! Util.isOperator(this.data.charAt(i - 1))) ) {
 							// ignore minus signs that denote a negative variable or value instead of subtraction
 							// operator s has been detected at position i
 							nextOperator = op;
@@ -156,8 +128,8 @@ class Node {
 			
 			if (left.length() != 0 && right.length() != 0) {
 				// only continue if splitting was done
-				left = removeOuterParentheses(left);
-				right = removeOuterParentheses(right);
+				left = Util.removeOuterParentheses(left);
+				right = Util.removeOuterParentheses(right);
 				this.left = new Node(left);
 				this.right = new Node(right);
 				this.data = Character.toString(nextOperator);
@@ -177,13 +149,15 @@ class Node {
 	
 	private void splitAtFunction(String[] functions) {
 		// first, find out if the current node contains a function
-		// note: the requirements of a string being a function are: must contain a '(', must not start with '(' and must
-		// end with ')'			
+		// note: the requirements of a string being a function are: must contain a '(', must not start with '(',
+		// must end with ')', and must not contain an operator outside the parentheses
 		int indexOfParenthesis = -1;
 		
 		for (int i = 0; i < this.data.length(); i++) {
 			if (this.data.charAt(i) == '(') {
 				indexOfParenthesis = i;
+				break;
+			} else if (Util.isOperator(this.data.charAt(i))) {
 				break;
 			}
 		}
@@ -240,12 +214,12 @@ class Node {
 				if (arg1.length() == 0) {
 					Error.notEnoughArguments(functionName);
 				} else {		
-					if (isOneArgFunction(functionName)) {					
+					if (Util.isOneArgFunction(functionName)) {					
 						// functions that take only one argument
 						if (arg2.length() != 0) {
 							Error.tooManyArguments(functionName);
 						}
-					} else if (isTwoArgsFunction(functionName)) {
+					} else if (Util.isTwoArgsFunction(functionName)) {
 						// functions that take only two arguments
 						if (arg2.length() == 0) {
 							Error.notEnoughArguments(functionName);
@@ -255,12 +229,12 @@ class Node {
 				
 				// finish arranging the function into the current node
 				if (! Interpreter.error) {
-					arg1 = removeOuterParentheses(arg1);
+					arg1 = Util.removeOuterParentheses(arg1);
 					this.left = new Node(arg1);
 					
 					// not all functions have a second argument
 					if (arg2.length() != 0) {
-						arg2 = removeOuterParentheses(arg2);
+						arg2 = Util.removeOuterParentheses(arg2);
 						this.right = new Node(arg2);
 					}
 					
@@ -276,84 +250,6 @@ class Node {
 
 		if (this.right != null && ! Interpreter.error) {
 			this.right.splitAtFunction(functions);
-		}
-	}
-	
-	
-	
-	
-	static boolean isOperator(char operator) {
-		for (char c : new char[]{'+', '-', '*', '/'}) {
-			if (c == operator) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	
-	// NOTICE: all functions must either accept one or two arguments, meaning that the same function must
-	// always accept the same number of arguments, no matter what the context is
-	static boolean isOneArgFunction(String function) {
-		for (String f : new String[]{"sqrt", "ln", "log", "sin", "cos", "tan"}) {
-			if (f.equals(function)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	
-	static boolean isTwoArgsFunction(String function) {
-		for (String f : new String[]{"root", "pow", "logbase"}) {
-			if (f.equals(function)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	
-	static String removeOuterParentheses(String statement) {
-		// this function removes the outer parentheses from the string in statement, if and only if
-		// the statement is a single whole parenthesized expression
-		
-		// keep track of how many parentheses of each type we have encountered, so we always know
-		// if we're in a parenthesized expression or not
-		int openPar = 0;
-		int closePar = 0;
-		
-		if ( statement.charAt(0) == '(' && statement.charAt(statement.length() - 1) == ')' ) {
-			// we first need to make sure that the outer parentheses are not part of two separate
-			// parallel parenthesized expressions; the way that we check this, is to look whether
-			// there are any operators *outside* any parentheses
-			boolean parallelOuterParentheses = false;
-			
-			for (int i = 0; i < statement.length(); i++) {
-				if (statement.charAt(i) == '(') {
-					openPar++;
-				} else if (statement.charAt(i) == ')') {
-					closePar++;
-				} else {
-					if (openPar == closePar) {
-						// remember: if we have encountered just as many opening as closing parentheses,
-						// then we are surely outside any parenthesized expression
-						parallelOuterParentheses = true;
-						break;
-					}
-				}			
-			}
-
-			// only remove the outer parentheses if they are not part of parallel parenthesized expressions
-			if (parallelOuterParentheses == false) {
-				return statement.substring(1, statement.length() - 1);
-			} else {
-				// outer parentheses are part of multiple parallel parenthesized expressions, return as-is
-				return statement;
-			}
-		} else {
-			// no outer parentheses, return as-is
-			return statement;
 		}
 	}
 }

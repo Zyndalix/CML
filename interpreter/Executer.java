@@ -16,8 +16,8 @@ class Executer {
 	
 	static double getValue(Node n) {
 		double value = 0;
-		if (! n.isSymbol()) {
-			if (n.isNumber()) {
+		if (! Util.isSymbol(n.data)) {
+			if (Util.isNumber(n.data)) {
 				value = Double.parseDouble(n.data);
 			} else if (Variable.get(n.data) != null) {
 				// n is probably a variable, test to see if variable exists

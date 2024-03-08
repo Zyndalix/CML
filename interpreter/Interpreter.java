@@ -29,8 +29,11 @@ public class Interpreter {
 		data = new ArrayList<ArrayList<String>>();
 		Node.list = new ArrayList<Node>();
 		Variable.list = new ArrayList<Variable>();
-		variables = Parser.prepare(variables);
-		rules = Parser.prepare(rules);
+		
+		variables = Parser.appendNewLine(variables);
+		rules = Parser.appendNewLine(rules);
+
+		rules = Parser.replacePowers(rules);
 
 		// parse variables and rules
 		Parser.extract(variables, Parser.VARIABLES);
