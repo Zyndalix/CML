@@ -3,13 +3,13 @@ package interpreter;
 class Executer {
 
 	static void executeRule(Node rule) {
-		if (rule.data == "=") {
+		if (rule.data.equals("=")) {
 			// calculate the new value of the variable
 			Variable varToTest = Variable.get(rule.left.data);
 			if (varToTest != null) {
-				varToTest.value = getValue(rule.right);
+				varToTest.value = Double.toString(getValue(rule.right));
 			} else {
-				Error.noSuchVariable(rule.left.data);
+				Error.noSuchVariable(rule.left.lineNumber, rule.left.data);
 			}
 		}
 	}
@@ -20,14 +20,14 @@ class Executer {
 			if (Util.isNumber(n.data)) {
 				value = Double.parseDouble(n.data);
 			} else if (Variable.get(n.data) != null) {
-				// n is probably a variable, test to see if variable exists
-				value = Variable.get(n.data).value;
+				// n is probably a variable name
+				value = Double.parseDouble(Variable.get(n.data).value);
 			} else if (n.data.equals("e")) {
 				value = Math.exp(1);
 			} else if (n.data.equals("pi") || n.data.equals("π")) {
 				value = Math.PI;
 			} else {
-				Error.noSuchVariable(n.data);
+				Error.noSuchVariable(n.lineNumber, n.data);
 			}
 		} else {
 			value = calculate(n);

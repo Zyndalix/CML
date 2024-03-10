@@ -18,9 +18,9 @@ class Variable {
 	
 
 	String name;
-	double value;
+	String value;
 	
-	Variable(String name, double value) {
+	Variable(String name, String value) {
 		this.name = name;
 		this.value = value;
 	}

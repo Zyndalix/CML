@@ -10,9 +10,11 @@ class Node {
 	String data;
 	Node left = null;
 	Node right = null;
+	int lineNumber; // line where the symbol in this.data was called; used for error messages
 
-	Node(String data) {
+	Node(String data, int lineNumber) {
 		this.data = data;
+		this.lineNumber = lineNumber;
 	}
 
 
@@ -130,8 +132,8 @@ class Node {
 				// only continue if splitting was done
 				left = Util.removeOuterParentheses(left);
 				right = Util.removeOuterParentheses(right);
-				this.left = new Node(left);
-				this.right = new Node(right);
+				this.left = new Node(left, this.lineNumber);
+				this.right = new Node(right, this.lineNumber);
 				this.data = Character.toString(nextOperator);
 			}
 		}
@@ -177,7 +179,7 @@ class Node {
 			}
 			
 			if (! isValidFunctionName) {
-				Error.noSuchFunction(functionName);
+				Error.noSuchFunction("rules", this.lineNumber, functionName);
 			} else {
 				// get arguments
 				// note: functions can have at most 2 arguments in CML
@@ -188,7 +190,7 @@ class Node {
 					if (this.data.charAt(i) == ',') {
 						commasEncountered++;
 						if (commasEncountered > 1) {
-							Error.tooManyArguments(functionName);
+							Error.tooManyArguments("rules", this.lineNumber, functionName);
 							break;
 						} else {
 							arg1 = sb.toString();
@@ -212,17 +214,17 @@ class Node {
 			if (! Interpreter.error) {
 				// check that the function got the right amount of arguments
 				if (arg1.length() == 0) {
-					Error.notEnoughArguments(functionName);
+					Error.notEnoughArguments("rules", this.lineNumber, functionName);
 				} else {		
 					if (Util.isOneArgFunction(functionName)) {					
 						// functions that take only one argument
 						if (arg2.length() != 0) {
-							Error.tooManyArguments(functionName);
+							Error.tooManyArguments("rules", this.lineNumber, functionName);
 						}
 					} else if (Util.isTwoArgsFunction(functionName)) {
 						// functions that take only two arguments
 						if (arg2.length() == 0) {
-							Error.notEnoughArguments(functionName);
+							Error.notEnoughArguments("rules", this.lineNumber, functionName);
 						}
 					}
 				}
@@ -230,12 +232,12 @@ class Node {
 				// finish arranging the function into the current node
 				if (! Interpreter.error) {
 					arg1 = Util.removeOuterParentheses(arg1);
-					this.left = new Node(arg1);
+					this.left = new Node(arg1, this.lineNumber);
 					
 					// not all functions have a second argument
 					if (arg2.length() != 0) {
 						arg2 = Util.removeOuterParentheses(arg2);
-						this.right = new Node(arg2);
+						this.right = new Node(arg2, this.lineNumber);
 					}
 					
 					this.data = functionName;

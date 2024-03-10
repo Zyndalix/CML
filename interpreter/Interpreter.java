@@ -28,26 +28,33 @@ public class Interpreter {
 	
 	public static ArrayList<ArrayList<String>> main(String variables, String rules, int iterations) {
 		// pre-interpreting tasks are performed here
+		// make sure global variables are properly initialized
 		error = false;
 		errorBuffer = new String();
 		data = new ArrayList<ArrayList<String>>();
-		Node.list = new ArrayList<Node>();
 		Variable.list = new ArrayList<Variable>();
+		Node.list = new ArrayList<Node>();
 		
+		// fix the raw strings		
 		variables = Parser.appendNewLine(variables);
 		rules = Parser.appendNewLine(rules);
+		Parser.check(variables, Parser.VARIABLES);
+		Parser.check(rules, Parser.RULES);
+		if (! error) rules = Parser.replacePowers(rules);
 
-		rules = Parser.replacePowers(rules);
-
-		// parse variables and rules
-		Parser.extract(variables, Parser.VARIABLES);
-		Parser.extract(rules, Parser.RULES);
+		// place variables and rules in Variable.list and Node.list
+		if (! error) Parser.extract(variables, Parser.VARIABLES);
+		if (! error) Parser.extract(rules, Parser.RULES);
 		
+		// replace calls to functions with their respective results, so for example sin(pi) becomes 0
+		//Parser.computeInitialValues();
+		
+		// start the actual interpretation
 		// prepare the data array, and create an initial snapshot of all variables
 		for (int i = 0; i < Variable.list.size(); i++) {
 			data.add(new ArrayList<String>());
 			data.get(i).add(Variable.list.get(i).name);
-			data.get(i).add(Double.toString(Variable.list.get(i).value));
+			data.get(i).add(Variable.list.get(i).value);
 		}
 
 		// calculate variables according to rules		
@@ -59,7 +66,7 @@ public class Interpreter {
 			
 			// create a snapshot of all variables during every iteration
 			for (int i = 0; i < Variable.list.size() && ! error; i++) {
-				data.get(i).add(Double.toString(Variable.list.get(i).value));
+				data.get(i).add(Variable.list.get(i).value);
 			}
 		}
 		
