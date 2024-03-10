@@ -1,5 +1,5 @@
 'This file is meant to be used during the development stage.
 
-x = 0
+x = sin(0.25 * pi)
 y = 0
 z = 0
