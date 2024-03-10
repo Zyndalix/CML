@@ -1,5 +1,6 @@
 package interpreter;
 
+// various utility functions
 class Util {
 
 	static boolean isNumber(String s) {

@@ -1,11 +1,7 @@
 package interpreter;
 
-import java.util.ArrayList;
-
-// this is for the abstract syntax tree; each rule has its own binary tree
+// this is for the abstract syntax tree; each variable and rule has its own binary tree
 class Node {
-
-	static ArrayList<Node> list;
 
 	String data;
 	Node left = null;
@@ -25,7 +21,7 @@ class Node {
 
     void print(String prefix, Node n, boolean isLeft, boolean isOnlyChild) {
         if (n != null) {
-            System.out.println(prefix + (isLeft && ! isOnlyChild ? "├── " : "└── ") + n.data);
+            Interpreter.diagnosticBuffer += prefix + (isLeft && ! isOnlyChild ? "├── " : "└── ") + n.data + "\n";
             print(prefix + (isLeft && ! isOnlyChild ? "│   " : "    "), n.left, true, (n.right == null ? true : false));
             print(prefix + (isLeft && ! isOnlyChild ? "│   " : "    "), n.right, false, (n.left == null ? true : false));
         }

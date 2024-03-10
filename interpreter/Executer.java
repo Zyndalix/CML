@@ -5,23 +5,35 @@ class Executer {
 	static void executeRule(Node rule) {
 		if (rule.data.equals("=")) {
 			// calculate the new value of the variable
-			Variable varToTest = Variable.get(rule.left.data);
+			Node varToTest = getVariable(rule.left.data);
 			if (varToTest != null) {
-				varToTest.value = Double.toString(getValue(rule.right));
+				varToTest.right.data = Double.toString(getValue(rule.right));
 			} else {
 				Error.noSuchVariable(rule.left.lineNumber, rule.left.data);
 			}
 		}
 	}
 	
+	
+	static Node getVariable(String searchName) {
+		for (Node n : Interpreter.variableList) {
+			if (n.left.data.equals(searchName)) {
+				return n;
+			}
+		}
+		return null;
+	}
+	
+	
 	static double getValue(Node n) {
+		// return the value of Node n, for example the value of a variable that is referenced in Node n
 		double value = 0;
 		if (! Util.isSymbol(n.data)) {
 			if (Util.isNumber(n.data)) {
 				value = Double.parseDouble(n.data);
-			} else if (Variable.get(n.data) != null) {
+			} else if (getVariable(n.data) != null) {
 				// n is probably a variable name
-				value = Double.parseDouble(Variable.get(n.data).value);
+				value = Double.parseDouble(getVariable(n.data).right.data);
 			} else if (n.data.equals("e")) {
 				value = Math.exp(1);
 			} else if (n.data.equals("pi") || n.data.equals("π")) {
@@ -35,7 +47,9 @@ class Executer {
 		return value;
 	}
 	
+	
 	static double calculate(Node equation) {
+		// calculate the result of a mathematical operation stored in Node equation
 		double result = 0, left = 0, right = 0;
 		
 		// get value for the left operand

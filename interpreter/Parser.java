@@ -2,7 +2,7 @@ package interpreter;
 
 class Parser {
 
-	// modes for the parse() function
+	// operation modes for some of the following functions
 	static final int VARIABLES = 0;
 	static final int RULES = 1;
 	
@@ -19,10 +19,7 @@ class Parser {
 	
 	
 	static void check(String input, int mode) {
-		// for each line in variables:
-		// - check number of equals signs
-		// - check that there are no parentheses
-		// for each line in rules:
+		// for each line in variables and rules:
 		// - check number of equals signs
 		// - check number of parentheses
 		int lineNumber = 0;
@@ -32,11 +29,9 @@ class Parser {
 		for (int i = 0; i < input.length(); i++) {
 			if (input.charAt(i) == '\n') {
 				lineNumber++;
-				if (mode == RULES) {
-					if (netParCount != 0) {
-						Error.parenthesesCount(lineNumber);
-						netParCount = 0;
-					}
+				if (netParCount != 0) {
+					Error.parenthesesCount((mode == VARIABLES) ? "variables" : "rules", lineNumber);
+					netParCount = 0;
 				}
 				if (equalsSignCount > 1) {
 					Error.onlyOneAssignment((mode == VARIABLES) ? "variables" : "rules", lineNumber);
@@ -44,12 +39,10 @@ class Parser {
 				equalsSignCount = 0;
 			} else if (input.charAt(i) == '=') {
 				equalsSignCount++;
-			} else if (mode == RULES && input.charAt(i) == '(') {
+			} else if (input.charAt(i) == '(') {
 				netParCount++;
-			} else if (mode == RULES && input.charAt(i) == ')') {
+			} else if (input.charAt(i) == ')') {
 				netParCount--;
-			} else if (mode == VARIABLES && input.charAt(i) == '(' || input.charAt(i) == ')') {
-				Error.noRulesInVariables(lineNumber);
 			}
 		}
 	}
@@ -137,11 +130,12 @@ class Parser {
 				
 				if (before.length() != 0 && after.length() != 0) {
 					if (mode == VARIABLES) {
-						if (Util.isNumber(after)) {
-							Variable.list.add(new Variable(before, after));
-						} else {
-							Error.invalidVariableInitializer(lineNumber, after);
-						}						
+						Node root = new Node("=", lineNumber);
+						root.left = new Node(before, lineNumber);
+						root.right = new Node(after, lineNumber);
+						
+						root.right.split();
+						Interpreter.variableList.add(root);					
 					} else if (mode == RULES) {
 						// this line is a rule; organize it into the rules list
 						Node root = new Node("=", lineNumber);
@@ -149,7 +143,7 @@ class Parser {
 						root.right = new Node(after, lineNumber);
 						
 						root.right.split();
-						Node.list.add(root);
+						Interpreter.ruleList.add(root);
 					}
 				}
 		
@@ -168,6 +162,16 @@ class Parser {
 				sb.append(input.charAt(i));
 			}
 
+		}
+	}
+	
+	
+	static void computeInitialValues() {
+		// compute initial values of variables before the main loop is run
+		for (Node n : Interpreter.variableList) {
+			if (! Util.isNumber(n.right.data)) {
+				n.right = new Node(Double.toString(Executer.getValue(n.right)), n.right.lineNumber);
+			}
 		}
 	}
 }

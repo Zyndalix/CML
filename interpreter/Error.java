@@ -4,12 +4,8 @@ class Error {
 
 	static String place = "location";
 
-	public static void noRulesInVariables(int lineNumber) {
-		errorHandler("variables", lineNumber, "", "rules may not be declared in the variable initialization list");
-	}
-
-	public static void parenthesesCount(int lineNumber) {
-		errorHandler("rules", lineNumber, "",
+	public static void parenthesesCount(String place, int lineNumber) {
+		errorHandler(place, lineNumber, "",
 			"opening parentheses count does not match closing parentheses count");
 	}
 	
