@@ -25,16 +25,37 @@ class Util {
 				return true;
 			}
 		}
+		
 		return false;
 	}
 	
-	static boolean isSymbol(String s) {    	
-    	if (s.length() == 1 && isOperator(s.charAt(0))) {
+	static boolean isSymbol(String symbol) {    	
+    	if (symbol.length() == 1 && isOperator(symbol.charAt(0))) {
     		return true;
     	}
     	
-    	if (isOneArgFunction(s) || isTwoArgsFunction(s)) {
+    	if (isOneArgFunction(symbol) || isTwoArgsFunction(symbol)) {
     		return true;
+    	}
+    	
+    	return false;
+    }
+    
+    static boolean isLogicalOperator(String operator) {
+    	for (String s : new String[]{"||", "&&"}) {
+    		if (operator.equals(s)) {
+    			return true;
+    		}
+    	}
+    	
+    	return false;
+    }
+    
+    static boolean isComparisonOperator(String operator) {
+    	for (String s : new String[]{"==", "!=", ">=", "<=", "> ", "< "}) {
+    		if (operator.equals(s)) {
+    			return true;
+    		}
     	}
     	
     	return false;
@@ -48,6 +69,7 @@ class Util {
 				return true;
 			}
 		}
+		
 		return false;
 	}
 
@@ -58,6 +80,7 @@ class Util {
 				return true;
 			}
 		}
+		
 		return false;
 	}
 	

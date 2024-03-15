@@ -4,14 +4,79 @@ class Executer {
 
 	static void executeRule(Node rule) {
 		if (rule.data.equals("=")) {
-			// calculate the new value of the variable
+			// assignment: calculate the new value of the variable
 			Node varToTest = getVariable(rule.left.data);
 			if (varToTest != null) {
 				varToTest.right.data = Double.toString(getValue(rule.right));
 			} else {
 				Error.noSuchVariable(rule.left.lineNumber, rule.left.data);
 			}
+		} else if (rule.data.equals("if")) {
+			// if statement
+			if (evaluateCondition(rule.left)) {
+				executeRule(rule.right);
+			}
+		} else if (rule.data.equals("stop")) {
+			// stop program execution
+			Interpreter.stop = true;
 		}
+	}
+	
+	
+	static boolean evaluateCondition(Node condition) {
+		if (Util.isComparisonOperator(condition.data)) {
+			return evaluateComparison(condition);
+		}
+		
+		boolean left = false, right = false;
+		
+		if (Util.isLogicalOperator(condition.left.data)) {
+			left = evaluateCondition(condition.left);
+		} else {			
+			left = evaluateComparison(condition.left);
+		}
+		
+		if (Util.isLogicalOperator(condition.right.data)) {
+			right = evaluateCondition(condition.right);
+		} else {			
+			right = evaluateComparison(condition.right);
+		}
+		
+		if (condition.data.equals("||")) {
+			if (left || right) {
+				return true;
+			}
+		} else if (condition.data.equals("&&")) {
+			if (left && right) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	
+	static boolean evaluateComparison(Node comparison) {	
+		double left = 0, right = 0;
+		
+		left = getValue(comparison.left);
+		right = getValue(comparison.right);
+		
+		if (comparison.data.equals("==")) {
+			if (left == right) return true;
+		} else if (comparison.data.equals("!=")) {
+			if (left != right) return true;
+		} else if (comparison.data.equals(">=")) {
+			if (left >= right) return true;
+		} else if (comparison.data.equals("<=")) {
+			if (left <= right) return true;
+		} else if (comparison.data.equals("> ")) {
+			if (left > right) return true;
+		} else if (comparison.data.equals("< ")) {
+			if (left < right) return true;
+		}
+		
+		return false;
 	}
 	
 	
@@ -34,6 +99,10 @@ class Executer {
 			} else if (getVariable(n.data) != null) {
 				// n is probably a variable name
 				value = Double.parseDouble(getVariable(n.data).right.data);
+			} else if (n.data.equals("true")) {
+				value = 1;
+			} else if (n.data.equals("false")) {
+				value = 0;
 			} else if (n.data.equals("e")) {
 				value = Math.exp(1);
 			} else if (n.data.equals("pi") || n.data.equals("π")) {
@@ -52,12 +121,9 @@ class Executer {
 		// calculate the result of a mathematical operation stored in Node equation
 		double result = 0, left = 0, right = 0;
 		
-		// get value for the left operand
-		if (equation.left != null) {
-			left = getValue(equation.left);
-		}
+		left = getValue(equation.left);
 		
-		// get value for the right operand
+		// not all operators have two operands
 		if (equation.right != null) {
 			right = getValue(equation.right);
 		}

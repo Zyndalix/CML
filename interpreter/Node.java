@@ -6,10 +6,12 @@ class Node {
 	String data;
 	Node left = null;
 	Node right = null;
+	char type; // can be either 'v' for variable or 'r' for rule
 	int lineNumber; // line where the symbol in this.data was called; used for error messages
 
-	Node(String data, int lineNumber) {
+	Node(String data, char type, int lineNumber) {
 		this.data = data;
+		this.type = type;
 		this.lineNumber = lineNumber;
 	}
 
@@ -26,127 +28,149 @@ class Node {
             print(prefix + (isLeft && ! isOnlyChild ? "│   " : "    "), n.right, false, (n.left == null ? true : false));
         }
     }
-
-
-	void split() {		
-		while (! this.isSplit() && ! Interpreter.error) {
-			this.splitAtOperator(new char[]{'+', '-'});
-			this.splitAtOperator(new char[]{'*', '/'});
-			this.splitAtFunction(new String[]{"sqrt", "root", "pow", "ln", "log", "logbase", "sin", "cos", "tan"});
+    
+    
+    void split() {
+    	if (this.data.startsWith("if")) {
+    		splitIfStatement();
+    	} else if (this.data.contains("=")) {
+    		splitAssignment();
+    	} else if (! this.data.equals("stop")) {
+    		Error.whatIsThis(this.type, this.lineNumber, this.data);
+    	}
+    }
+    
+    
+	private void splitIfStatement() {
+	
+		StringBuilder sb = new StringBuilder();
+		int lineNumber = this.lineNumber;
+	
+		for (int i = 2; i < this.data.length(); i++) {
+			if (i + 4 < this.data.length() && this.data.substring(i, i + 4).contains("then")) {
+				// create condition
+				this.left = new Node(sb.toString(), this.type, lineNumber);
+				sb.setLength(0);
+				i += 4;
+				
+			} else if (i + 5 < this.data.length() && this.data.substring(i, i + 5).contains("endif")) {
+				this.right = new Node(sb.toString(), this.type, lineNumber);
+				
+			} else if (this.data.charAt(i) == '\n') {
+				lineNumber++;
+				
+			} else {
+				sb.append(this.data.charAt(i));
+			}
 		}
+		
+		this.data = "if";
+		
+		this.left.splitCondition();
+		if (! this.right.data.equals("stop")) this.right.splitAssignment();		
+	}
+	
+	
+	private void splitCondition() {
+		// get outer parentheses out of the way
+		this.data = Util.removeOuterParentheses(this.data);
+	
+		// splits a condition, so what comes after if in an if statement
+		splitAtOperator(new String[]{"||"});
+		splitAtOperator(new String[]{"&&"});
+		splitAtOperator(new String[]{"==", "!=", ">=", "<=", "> ", "< "});
+		
+		if (this.left != null) this.left.splitCondition();
+		if (this.right != null) this.right.splitCondition();
 	}
 
     
-    private boolean isSplit() {
-		// keep track of the net parentheses count: if it's positive, then we have encountered more
-		// opening than closing parentheses; the opposite is true for a negative value
-		int netParCount = 0;
-		
-		// first check if this node contains an unsplit string with an exterior operator 
-		// (i.e. not inside parentheses)
-		if (this.data.length() > 1) {
-			for (int i = 0; i < this.data.length(); i++) {
-				if (this.data.charAt(i) == '(') {
-					netParCount++;
-				} else if (this.data.charAt(i) == ')') {
-					netParCount--;
-				} else if (netParCount == 0 && Util.isOperator(this.data.charAt(i))) {
-					return false;
-				}
+	private void splitAssignment() {
+		// splits the assignment, so for example x = x + 1
+		// this function is run only once for each assignment, in contrast with splitCalculation,
+		// which is recursive
+		int equalsSignPos = -1;
+		for (int i = 0; i < this.data.length(); i++) {
+			if (this.data.charAt(i) == '=' && equalsSignPos == -1) {
+				equalsSignPos = i;
+			} else if (this.data.charAt(i) == '=' && equalsSignPos != -1) {
+				// another equals sign has been found, no good
+				Error.onlyOneAssignment(this.type, this.lineNumber);
 			}
 		}
 		
-		// if we have come this far, then there are no exterior operators, and therefore also no
-		// interior operators (why would an operator be enclosed in parentheses if there's no
-		// operator outside them?); thus, the only parentheses that could be encountered, are those
-		// of a function
-		if (this.data.contains("(")) {
-			return false;
-		}
+		// split assignment
+		this.left = new Node(this.data.substring(0, equalsSignPos), this.type, this.lineNumber);
+		this.right = new Node(this.data.substring(equalsSignPos + 1), this.type, this.lineNumber);
+		this.data = "=";
 		
-		if (this.left != null) {
-			if (! this.left.isSplit()) {
-				return false;
+		// check that the left part is not a calculation
+		for (int i = 0; i < this.left.data.length(); i++) {
+			if (Util.isOperator(this.left.data.charAt(i))) {
+				Error.noCalculationBeforeEqualsSign(this.type, this.lineNumber, this.left.data);
+				break;
 			}
 		}
 		
-		if (this.right != null) {
-			if (! this.right.isSplit()) {
-				return false;
-			}
-		}
+		// split the right part
+		this.right.splitCalculation();
+	}
+
+
+	private void splitCalculation() {
+		// get outer parentheses out of the way
+		this.data = Util.removeOuterParentheses(this.data);
+	
+		// splits a calculation, so what comes after the equals sign in an assignment
+		splitAtOperator(new String[]{"+", "-"});
+		splitAtOperator(new String[]{"*", "/"});
+		this.splitAtFunction(new String[]{"sqrt", "root", "pow", "ln", "log", "logbase", "sin", "cos", "tan"});
 		
-		return true;
+		if (this.left != null) this.left.splitCalculation();
+		if (this.right != null) this.right.splitCalculation();
 	}
 	
 	
-	private void splitAtOperator(char[] operators) {
-		// note: due to the way that binary trees work, operators are added from last to first
-		char nextOperator = 0;
-		int indexOfNextOperator = -1;
-		boolean stop = false;
-		// keep track of the net parentheses count: if it's positive, then we have encountered more
-		// opening than closing parentheses; the opposite is true for a negative value
+	private void splitAtOperator(String[] operators) {
+		int opLen = operators[0].length(); // operator length, assuming all operators have the same length
+		String currStr = new String(); // current string
 		int netParCount = 0;
+		boolean stop = false;
 	
-		// now, iterate from back to forth till we detect any of the desired operators
-		// (supplied in the symbols[] array)
-		if (this.data.length() > 1) {
-			for (int i = this.data.length() - 1; i >= 0 && stop == false; i--) {		
-				if (this.data.charAt(i) == '(') {
-					netParCount++;
-				} else if (this.data.charAt(i) == ')') {
-					netParCount--;
-				} else if (netParCount == 0) {
-					for (char op : operators) {
-						// if we have encountered just as many '(' as ')', then the current position
-						// is very surely not inside a parenthesized expression
-						if ( this.data.charAt(i) == op && (i == 0 || ! Util.isOperator(this.data.charAt(i - 1))) ) {
-							// ignore minus signs that denote a negative variable or value instead of subtraction
-							// operator s has been detected at position i
-							nextOperator = op;
-							indexOfNextOperator = i;
-							stop = true;
-							break;
-						}
+		for (int i = this.data.length() - 1; i >= 0 && stop == false; i--) {
+			if (i + opLen < this.data.length()) {
+				currStr = this.data.substring(i, i + opLen);
+			}
+			
+			if (this.data.charAt(i) == '(') {
+				netParCount++;
+			} else if (this.data.charAt(i) == ')') {
+				netParCount--;
+			} else if (netParCount == 0) {
+				for (String op : operators) {
+					if (currStr.equals(op)) {
+						splitAtPosition(i, opLen);
+						stop = true;
+						break;
 					}
 				}
 			}
-		}
-		
-		if (indexOfNextOperator != -1) {
-			// only continue if an operator was found
-			String left = this.data.substring(0, indexOfNextOperator);
-			String right = this.data.substring(indexOfNextOperator + 1);
-			
-			if (nextOperator == '-' && left.length() == 0) {
-				// the value in the string 'right' needs to be made negative; subtract it from 0 to do so
-				left = "0";
-			}
-			
-			if (left.length() != 0 && right.length() != 0) {
-				// only continue if splitting was done
-				left = Util.removeOuterParentheses(left);
-				right = Util.removeOuterParentheses(right);
-				this.left = new Node(left, this.lineNumber);
-				this.right = new Node(right, this.lineNumber);
-				this.data = Character.toString(nextOperator);
-			}
-		}
-		
-		// also split the subtrees, if they exist
-		if (this.left != null && ! Interpreter.error) {
-			this.left.splitAtOperator(operators);
-		}
-
-		if (this.right != null && ! Interpreter.error) {
-			this.right.splitAtOperator(operators);
+		}	
+	}
+	
+	
+	private void splitAtPosition(int position, int length) {
+		// splits this.data at a certain string
+		if (position + length < this.data.length()) {
+			this.left = new Node(this.data.substring(0, position), this.type, this.lineNumber);
+			this.right = new Node(this.data.substring(position + length), this.type, this.lineNumber);
+			this.data = this.data.substring(position, position + length);
 		}
 	}
 	
 	
-	private void splitAtFunction(String[] functions) {
-		// first, find out if the current node contains a function
+	private void splitAtFunction(String[] functions) {	
+		// find out if the current node contains a function
 		// note: the requirements of a string being a function are: must contain a '(', must not start with '(',
 		// must end with ')', and must not contain an operator outside the parentheses
 		int indexOfParenthesis = -1;
@@ -175,7 +199,7 @@ class Node {
 			}
 			
 			if (! isValidFunctionName) {
-				Error.noSuchFunction("rules", this.lineNumber, functionName);
+				Error.noSuchFunction(this.type, this.lineNumber, functionName);
 			} else {
 				// get arguments
 				// note: functions can have at most 2 arguments in CML
@@ -186,7 +210,7 @@ class Node {
 					if (this.data.charAt(i) == ',') {
 						commasEncountered++;
 						if (commasEncountered > 1) {
-							Error.tooManyArguments("rules", this.lineNumber, functionName);
+							Error.tooManyArguments(this.type, this.lineNumber, functionName);
 							break;
 						} else {
 							arg1 = sb.toString();
@@ -210,34 +234,28 @@ class Node {
 			if (! Interpreter.error) {
 				// check that the function got the right amount of arguments
 				if (arg1.length() == 0) {
-					Error.notEnoughArguments("rules", this.lineNumber, functionName);
-				} else {		
-					if (Util.isOneArgFunction(functionName)) {					
-						// functions that take only one argument
-						if (arg2.length() != 0) {
-							Error.tooManyArguments("rules", this.lineNumber, functionName);
-						}
-					} else if (Util.isTwoArgsFunction(functionName)) {
-						// functions that take only two arguments
-						if (arg2.length() == 0) {
-							Error.notEnoughArguments("rules", this.lineNumber, functionName);
-						}
-					}
+					Error.notEnoughArguments(this.type, this.lineNumber, functionName);
+					
+				} else if (Util.isOneArgFunction(functionName) && arg2.length() != 0) {					
+					// functions that take only one argument
+					Error.tooManyArguments(this.type, this.lineNumber, functionName);
+					
+				} else if (Util.isTwoArgsFunction(functionName) && arg2.length() == 0) {
+					// functions that take only two arguments
+					Error.notEnoughArguments(this.type, this.lineNumber, functionName);
+				}
+			}
+				
+			// finish arranging the function into the current node
+			if (! Interpreter.error) {
+				this.left = new Node(arg1, this.type, this.lineNumber);
+				
+				// not all functions have a second argument
+				if (arg2.length() != 0) {
+					this.right = new Node(arg2, this.type, this.lineNumber);
 				}
 				
-				// finish arranging the function into the current node
-				if (! Interpreter.error) {
-					arg1 = Util.removeOuterParentheses(arg1);
-					this.left = new Node(arg1, this.lineNumber);
-					
-					// not all functions have a second argument
-					if (arg2.length() != 0) {
-						arg2 = Util.removeOuterParentheses(arg2);
-						this.right = new Node(arg2, this.lineNumber);
-					}
-					
-					this.data = functionName;
-				}
+				this.data = functionName;
 			}
 		}
 		
