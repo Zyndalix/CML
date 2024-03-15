@@ -5,59 +5,97 @@ import java.util.ArrayList;
 public class Interpreter {
 
 	// this becomes true if an error is encountered; functions of the interpreter will then not execute
-	static boolean error;
+	static boolean			error;
+	public static String	errorBuffer;
+	// this becomes true if the "stop" keyword is used; interpreter will run one last time and quit
+	static boolean			stop;
+	// for additional possibly interesting information for the user, such as the Abstract Syntax Trees
+	// of each variable and rule
+	public static String	diagnosticBuffer;
+	static ArrayList<Node>	variableList;
+	static ArrayList<Node>	ruleList;
 	static ArrayList<ArrayList<String>> data;
-
-	static void debugPrint() {
-		for (Variable v : Variable.list) {
-			v.print();
-		}
-		
-		System.out.print("\n\n");
-		
-		for (Node n : Node.list) {
-			n.print();
-		}
-		
-		System.out.println(data);
-	}
 	
 	
 	public static ArrayList<ArrayList<String>> interpret(String variables, String rules, int iterations) {
 		// pre-interpreting tasks are performed here
-		error = false;
-		data = new ArrayList<ArrayList<String>>();
-		Node.list = new ArrayList<Node>();
-		Variable.list = new ArrayList<Variable>();
-		variables = Parser.prepare(variables);
-		rules = Parser.prepare(rules);
-
-		// parse variables and rules
-		Parser.extract(variables, Parser.VARIABLES);
-		Parser.extract(rules, Parser.RULES);
+		// make sure global variables are properly initialized
+		error				= false;
+		stop				= false;
+		errorBuffer			= new String();
+		diagnosticBuffer	= new String();
+		variableList		= new ArrayList<Node>();
+		ruleList			= new ArrayList<Node>();
+		data				= new ArrayList<ArrayList<String>>();
 		
+		// fix the raw strings		
+		variables	= Parser.appendNewLine(variables);
+		rules		= Parser.appendNewLine(rules);
+		variables	= Parser.stripUnneededChars(variables);
+		rules		= Parser.stripUnneededChars(rules);
+		Parser.checkParenthesesCount(variables, 'v');
+		Parser.checkParenthesesCount(rules, 'r');		
+		if (! error)	variables	= Parser.replaceNegativeSigns(variables);
+		if (! error)	rules		= Parser.replaceNegativeSigns(rules);
+		if (! error)	variables	= Parser.replacePowers(variables);
+		if (! error)	rules		= Parser.replacePowers(rules);
+		if (! error)	rules		= Parser.replaceGtAndLtSigns(rules);
+
+		// place variables and rules in variableList and ruleList
+		if (! error) Parser.extract(variables, 'v');
+		if (! error) Parser.extract(rules, 'r');
+		
+		// organize each variable and rule into Abstract Syntax Trees
+		if (! error) for (Node n : variableList) n.split();
+		if (! error) for (Node n : ruleList) n.split();
+		
+		if (! error) {		
+			// store all initial values and the Abstract Syntax Trees of all variables and rules
+			diagnosticBuffer += "Variables:\n";
+			for (Node n : variableList) n.print();
+			
+			// replace calls to functions with their respective results, so for example sin(pi) becomes 0
+			Parser.computeInitialValues();
+			
+			diagnosticBuffer += "\n\nPrecomputed values of variables:\n";
+			for (Node n : variableList) diagnosticBuffer += n.left.data + " = " + n.right.data + "\n";
+			
+			diagnosticBuffer += "\n\nRules:\n";
+			for (Node n : ruleList) n.print();
+		}
+		
+		// start the actual interpretation
 		// prepare the data array, and create an initial snapshot of all variables
-		for (int i = 0; i < Variable.list.size(); i++) {
-			data.add(new ArrayList<>());
-			data.get(i).add(Variable.list.get(i).name);
-			data.get(i).add(Double.toString(Variable.list.get(i).value));
+		if (! error) {
+			for (int i = 0; i < variableList.size(); i++) {
+				data.add(new ArrayList<String>());
+				data.get(i).add(variableList.get(i).left.data);
+				data.get(i).add(variableList.get(i).right.data);
+			}
 		}
 
 		// calculate variables according to rules		
 		// first iteration has been run already, that's why it starts at 1
 		for (int iter = 1; iter < iterations && ! error; iter++) {
-			for (int i = 0; i < Node.list.size() && ! error; i++) {
-				Executer.executeRule(Node.list.get(i));
+			for (int i = 0; i < ruleList.size(); i++) {
+				Executer.executeRule(ruleList.get(i));
 			}
 			
 			// create a snapshot of all variables during every iteration
-			for (int i = 0; i < Variable.list.size() && ! error; i++) {
-				data.get(i).add(Double.toString(Variable.list.get(i).value));
+			for (int i = 0; i < variableList.size(); i++) {
+				data.get(i).add(variableList.get(i).right.data);
+			}
+			
+			// stop program execution if needed
+			if (stop) {
+				break;
 			}
 		}
 		
 		// remove this before final release; comment this to make the interpreter quiet
-		debugPrint();
+		System.out.println(errorBuffer);
+		System.out.println(diagnosticBuffer);
+		System.out.println(data);
 		
 		return data;
 	}

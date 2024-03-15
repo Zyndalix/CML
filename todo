@@ -22,3 +22,10 @@ User Interface:
 Graph:
 	- find suitable graphing lib -> JFreeChart
 	- add functions to change graphs according to UI (choose variables to graph, change scale of graph)
+	
+Interpreter (eventually):
+	- nested if statements
+	- if else statements
+	- multiple rules in if-body
+	
+	- NodeGroup class for grouping nodes in if-body and all nodes in variableList and ruleList
