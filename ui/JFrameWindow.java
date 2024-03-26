@@ -30,7 +30,6 @@ public class JFrameWindow {
     private JTextArea variablesText;
     private String variablesTextString;
 
-
     private JPanel iterationsPanel;
     public JTextField iterationsText;
 	public String iterationsTextString;
@@ -51,17 +50,11 @@ public class JFrameWindow {
 
 	public Color backgroundColor;
 
-	//Interpreter should log the tree to this variable, so it can be added to the UI Textarea
-	//Default is empty
-	public static String treeText = "";
-
-	//Interpreter should log the error to this variable, so it can be added to the UI Textarea
-	//if no errors this is default:
-
-    //Always start with a new line to not overlap text.
-	public static String errorText = "";
 	private JTextPane consolePane;
     private StyledDocument consoleDoc;
+
+	private JTextPane diagnosticsPane;
+	private StyledDocument diagnosticsDoc;
 
 	JFreeChart chart;
 	ArrayList<String> lines;
@@ -159,9 +152,10 @@ public class JFrameWindow {
         c.ipadx = 0;
         c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.FIRST_LINE_START;
+
 		consolePane = new JTextPane();
 		consolePane.setEditable(false);
-		consolePane.setText(errorText);
+		consolePane.setText("");
         consoleDoc = consolePane.getStyledDocument();
 		JScrollPane consoleScrollPane = new JScrollPane(consolePane);
 		pane.add(consoleScrollPane, c);
@@ -173,11 +167,13 @@ public class JFrameWindow {
         c.weightx = 0.5;
         c.weighty = 0.5;
 		c.fill = GridBagConstraints.BOTH;
-		JTextArea treeTextArea = new JTextArea(0,0);
-		treeTextArea.setEditable(false);
-		treeTextArea.setText(treeText);
-		JScrollPane treeScrollPane = new JScrollPane(treeTextArea);
-		pane.add(treeScrollPane, c);
+
+		diagnosticsPane = new JTextPane();
+		diagnosticsPane.setEditable(false);
+		diagnosticsPane.setText("");
+		diagnosticsDoc = diagnosticsPane.getStyledDocument();
+		JScrollPane diagnosticsScrollPane = new JScrollPane(diagnosticsPane);
+		pane.add(diagnosticsScrollPane, c);
         pane.setBackground(backgroundColor);
 	}
 	public void setGraph(JFreeChart c, ArrayList<String> setLines){
@@ -190,7 +186,7 @@ public class JFrameWindow {
 	}
 
 	public void consoleLog(String err, int errorIndex){
-        Style style = consolePane.addStyle("I'm a Style", null);
+        Style style = consolePane.addStyle("ErrorStyle", null);
 
         if(errorIndex == 0)
             StyleConstants.setForeground(style, redColor);
@@ -206,6 +202,25 @@ public class JFrameWindow {
 
 		consolePane.repaint();
 		consolePane.revalidate();
+	}
+
+	public void diagnosticsLog(String diag){
+		Style style = diagnosticsPane.addStyle("DiagnosticStyle", null);
+
+		StyleConstants.setForeground(style, redColor);
+		try { diagnosticsDoc.insertString(diagnosticsDoc.getLength(), "//CREATED NEW GRAPH//\n",style); }
+		catch (BadLocationException e){
+			System.out.print("Couldnt print to console: " + diag);
+		}
+
+		StyleConstants.setForeground(style, greenColor);
+		try { diagnosticsDoc.insertString(diagnosticsDoc.getLength(), diag,style); }
+		catch (BadLocationException e){
+			System.out.print("Couldnt print to console: " + diag);
+		}
+
+		diagnosticsPane.repaint();
+		diagnosticsPane.revalidate();
 	}
 
 	public void getIterationsText(){

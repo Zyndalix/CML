@@ -17,9 +17,6 @@ import ui.*;
 
 public class Main {
 
-	public static Runnable UIThread;
-
-
 	public static void main(String[] args) {
 		CreateGraph.setUpUI();
 	}

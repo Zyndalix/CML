@@ -1,5 +1,7 @@
 package interpreter;
 
+import graphing.CreateGraph;
+
 import java.util.ArrayList;
 
 public class Interpreter {
@@ -94,7 +96,11 @@ public class Interpreter {
 		
 		// remove this before final release; comment this to make the interpreter quiet
 		System.out.println(errorBuffer);
+		CreateGraph.appWindow.consoleLog(errorBuffer, 0);
+
 		System.out.println(diagnosticBuffer);
+		CreateGraph.appWindow.diagnosticsLog(diagnosticBuffer);
+
 		System.out.println(data);
 		
 		return data;
