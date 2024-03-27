@@ -44,7 +44,7 @@ public class CreateGraph {
             lines.add(new XYSeries(chartData.get(i).get(0)));
             if(i == appWindow.xAxisIndex || !appWindow.enabledLines[i])
                 continue;
-            for (int j = 1; j < iterations; j++){
+            for (int j = 1; j < Math.min(iterations, chartData.get(i).size()); j++){
                 double xValue = Double.parseDouble(chartData.get(appWindow.xAxisIndex).get(j));
                 double yValue = Double.parseDouble(chartData.get(i).get(j));
 
