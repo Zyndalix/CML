@@ -106,7 +106,7 @@ class Node {
 		
 		// check that the left part is not a calculation
 		for (int i = 0; i < this.left.data.length(); i++) {
-			if (Util.isOperator(this.left.data.charAt(i))) {
+			if (Util.isArithmeticOperator(this.left.data.charAt(i))) {
 				Error.noCalculationBeforeEqualsSign(this.type, this.lineNumber, this.left.data);
 				break;
 			}
@@ -179,7 +179,7 @@ class Node {
 			if (this.data.charAt(i) == '(') {
 				indexOfParenthesis = i;
 				break;
-			} else if (Util.isOperator(this.data.charAt(i))) {
+			} else if (Util.isArithmeticOperator(this.data.charAt(i))) {
 				break;
 			}
 		}

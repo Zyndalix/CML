@@ -67,7 +67,7 @@ class Parser {
 				currCh = input.charAt(currentPosition);
 				prevCh = input.charAt(currentPosition - 1);
 				
-				if (currCh == '-' && (Util.isOperator(prevCh) || prevCh == '=' || prevCh == '(') ) {
+				if (currCh == '-' && (Util.isArithmeticOperator(prevCh) || prevCh == '=' || prevCh == '(') ) {
 					signLocation = currentPosition;
 				}
 			}
@@ -85,7 +85,7 @@ class Parser {
 						netParCount++;
 					} else if (currCh == ')') {
 						netParCount--;
-					} else if (currCh == '\n' || Util.isOperator(currCh) && netParCount == 0) {
+					} else if (currCh == '\n' || Util.isArithmeticOperator(currCh) && netParCount == 0) {
 						end = i;
 						break;
 					}
@@ -141,7 +141,7 @@ class Parser {
 						}
 					} else if (currCh == ')') {
 						netParCount--;
-					} else if (currCh == '=' || Util.isOperator(currCh) && netParCount == 0) {
+					} else if (currCh == '=' || Util.isArithmeticOperator(currCh) && netParCount == 0) {
 						start = i + 1;
 						break;
 					}
@@ -159,7 +159,7 @@ class Parser {
 							end = i;
 							break;
 						}
-					} else if (currCh == '\n' || Util.isOperator(currCh) && netParCount == 0) {
+					} else if (currCh == '\n' || Util.isArithmeticOperator(currCh) && netParCount == 0) {
 						end = i;
 						break;
 					}

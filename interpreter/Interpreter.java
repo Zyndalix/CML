@@ -79,9 +79,9 @@ public class Interpreter {
 		// calculate variables according to rules		
 		// first iteration has been run already, that's why it starts at 1
 		for (int iter = 1; iter < iterations && ! error; iter++) {
-			for (int i = 0; i < ruleList.size(); i++) {
-				Executer.executeRule(ruleList.get(i));
-			}
+            for (Node node : ruleList) {
+                Executer.executeRule(node);
+            }
 			
 			// create a snapshot of all variables during every iteration
 			for (int i = 0; i < variableList.size(); i++) {
@@ -94,14 +94,9 @@ public class Interpreter {
 			}
 		}
 		
-		// remove this before final release; comment this to make the interpreter quiet
-		System.out.println(errorBuffer);
+		// send information to the UI
 		CreateGraph.appWindow.consoleLog(errorBuffer, 0);
-
-		System.out.println(diagnosticBuffer);
 		CreateGraph.appWindow.diagnosticsLog(diagnosticBuffer);
-
-		System.out.println(data);
 		
 		return data;
 	}

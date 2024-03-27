@@ -18,19 +18,9 @@ class Util {
 		
 		return success;
     }
-    
-    static boolean isOperator(char operator) {
-		for (char c : new char[]{'+', '-', '*', '/'}) {
-			if (c == operator) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
 	
 	static boolean isSymbol(String symbol) {    	
-    	if (symbol.length() == 1 && isOperator(symbol.charAt(0))) {
+    	if (symbol.length() == 1 && isArithmeticOperator(symbol.charAt(0))) {
     		return true;
     	}
     	
@@ -40,6 +30,16 @@ class Util {
     	
     	return false;
     }
+
+	static boolean isArithmeticOperator(char operator) {
+		for (char c : new char[]{'+', '-', '*', '/'}) {
+			if (c == operator) {
+				return true;
+			}
+		}
+
+		return false;
+	}
     
     static boolean isLogicalOperator(String operator) {
     	for (String s : new String[]{"||", "&&"}) {
